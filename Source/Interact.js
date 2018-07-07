@@ -137,7 +137,7 @@ function Message(api,id,text){
 
 
 //sends messages
-function sendmessage(err, api){
+function sendmessage(err, api, ask){
 	
     if(err) return console.error(err);
     

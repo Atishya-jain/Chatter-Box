@@ -26,7 +26,7 @@ function ask(err, api){
 	if(ans == "1"){
 		interact.listen(api);
     }else{
-    	interact.sendmessage(err,api);
+    	interact.sendmessage(err,api, ask);
     } 
 }
 
