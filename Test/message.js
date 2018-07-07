@@ -82,7 +82,10 @@ function listen(api){
 								
 						 		
 								if(message.attachments[attachment].type == "photo"){
-									
+									var dir = './Photo'
+									if (!fs.existsSync(dir)){
+    									fs.mkdirSync(dir);
+									}
 									var dir = './Photo/'+ ret[prop].name;
 
 									if (!fs.existsSync(dir)){
