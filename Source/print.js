@@ -2,11 +2,12 @@
 	This file contains various functions to print on terminal depending on different screens
 	This should be a stand-alone API
 */
+const fs = require("fs");
 
-function print(){
-	console.log("Done");
+function SaveSession(api){
+	fs.writeFileSync('appstate.json', JSON.stringify(api.getAppState()));
 }
 
 module.exports  = {
-	'print':print
+	'SaveSession':SaveSession
 }

@@ -42,9 +42,9 @@ function start(credentials, savesession){
 	    		logLevel: "silent"
 			});
 		}else{
-			fs.writeFileSync('appstate.json', JSON.stringify(api.getAppState()));
+			Output.SaveSession(api);
 		}
-		ans = '';
-		ask();  
+//		ans = '';
+		Input.ask(err, api);  
 	});
 }
