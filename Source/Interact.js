@@ -14,7 +14,25 @@ function log(text) {
 
 // listens for the messages on messenger 
 function listen(api){
+	console.log("\033c");
 	displayFriendList(api);
+}
+
+function unreadThreads(api){
+	console.log("\033c");
+	api.getThreadList(100, null, ["INBOX", "unread"], function(err, list){
+		if(err) console.log(error);
+		var i = 1;
+		for(item in list){
+			console.log(i+"\033[1m"+list[item].name + " : " + list[item].snippet+"\033[0m");
+			i++;
+		}
+
+		var id = readline.question("Who do you want to talk:(enter sno.)>> ");
+		var userID = list[id-1].threadID;
+		var name = list[id-1].name;
+		listenCallback(api,userID,name)
+	});
 }
 
 
@@ -80,9 +98,27 @@ function displayFriendList(api){
 
 
 function listenCallback(api,id,name){
+
+	
 	createWindows();
 	log("yo");
-	api.listen((err, message) => {
+	
+	api.getThreadHistory(id, 10, null, (err, history) => {
+        if(err) return log(err);    
+        for(item in history){
+        	if(history[item].senderID == history[item].threadID){
+        		if(history[item].isUnread){
+        			log("\033[1m"+name + " : " + history[item].body);
+        		}else{
+        			log(name + " : " + history[item].body);
+        		}
+        	}else{
+        		log(" You : " + history[item].body);
+        	}
+        }
+        
+    });
+    api.listen((err, message) => {
     	
 		if(message){
 			
@@ -137,7 +173,7 @@ function Message(api,id,text){
 
 
 //sends messages
-function sendmessage(err, api, ask){
+function sendmessage(err, api,ask){
 	
     if(err) return console.error(err);
     
@@ -164,7 +200,6 @@ var download = function(uri, filename, callback){
   request.head(uri, function(err, res, body){
     console.log('content-type:', res.headers['content-type']);
     console.log('content-length:', res.headers['content-length']);
-
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
   });
 };
@@ -172,5 +207,6 @@ var download = function(uri, filename, callback){
 module.exports = {
 	'listen': listen,
 	'sendmessage': sendmessage,
-	'download': download
+	'download': download,
+	'unreadThreads':unreadThreads,
 }

@@ -21,13 +21,15 @@ function GetCredentials(){
 
 
 function ask(err, api){
-	console.log("Hi There What do you want to do .... \n 1)Listen For Messages \n2)Send A New Message\n3)Send Image")	
+	console.log("Hi There What do you want to do .... \n 1)Chat With a friend \n2)Send A New Message\n3)See UnreadThreads")	
 	ans = readline.question("Option: ");
 	if(ans == "1"){
 		interact.listen(api);
+    }else if(ans == "2"){
+    	interact.sendmessage(err,api,ask);
     }else{
-    	interact.sendmessage(err,api, ask);
-    } 
+    	interact.unreadThreads(api);
+    }
 }
 
 module.exports = {
