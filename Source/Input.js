@@ -1,0 +1,4 @@
+/*
+	This API contains various functions to take input from the user and pass them back
+	in the form required by the caller.
+*/

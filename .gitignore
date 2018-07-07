@@ -91,5 +91,5 @@ lerna-debug.log
 Thumbs.db
 
 appstate.json
-Test/
+Test/*
 Photo/
