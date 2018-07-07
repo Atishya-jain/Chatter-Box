@@ -17,6 +17,8 @@ const request = require("request");
 const Input = require("./Input");
 const Output = require("./print");
 
+
+console.log("\033c");
 FBLogin();
 
 function FBLogin(){

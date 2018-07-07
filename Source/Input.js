@@ -4,13 +4,14 @@
 */
 const readline = require("readline-sync")
 const interact = require('./Interact');
-const fs = require
+const fs = require("fs");
+
 // Function to get credentials of the user.
 // ToDo: Implement functionality to detect escape character and again prompt back to enter password.
 // Escape character signifies that password entered was by mistake
 function GetCredentials(){
 	email = readline.question("Email: ");
-	password = readline.question("password: ",{
+	password = readline.question("Password: ",{
 		hideEchoBack: true,
 		mask: '*'
 	});
@@ -20,12 +21,12 @@ function GetCredentials(){
 
 
 function ask(err, api){
-	console.log("Hi There What do you want to do .... \n 1)Listen For Messages \n2)Send A New Message")	
+	console.log("Hi There What do you want to do .... \n 1)Listen For Messages \n2)Send A New Message\n3)Send Image")	
 	ans = readline.question("Option: ");
 	if(ans == "1"){
-		interact.listen(api,ask);
+		interact.listen(api);
     }else{
-    	interact.sendmessage(err,api,ask);
+    	interact.sendmessage(err,api);
     } 
 }
 
