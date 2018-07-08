@@ -196,6 +196,7 @@ function listenCallback(api,id,name){
 
 function Message(api,id,text){
 	if(text.match("@menu")){
+		screen.destroy();
 		markRead(api,id);	
 	}else{
 		api.sendMessage(text, id);
