@@ -2,15 +2,23 @@ const readline = require("readline-sync")
 //const Input = require("./Input");
 const fs = require("fs");
 const blessed = require('blessed');
+const request = require('request');
+const shell = require('shelljs');
+require('shelljs-plugin-open');
 
 var screen;
 var body;
 var inputBar;
+var notification;
 function log(text) {
   body.pushLine(text);
   screen.render();
 }
 
+function lognotification(text){
+	notification.content = text;		
+	screen.render();
+}
 
 // listens for the messages on messenger 
 function listen(api){
@@ -40,10 +48,28 @@ function createWindows(){
 	screen = blessed.screen({
 	  smartCSR: true
 	});
+	notification = blessed.box({
+		top: 0,
+	  	left: 0,
+	  	height: 1,
+	  	width: '100%',
+	  	keys: true,
+	  	mouse: true,
+	  	alwaysScroll: true,
+	  	scrollable: true,
+	  	scrollbar: {
+	    	ch: ' ',
+	    	bg: 'red'
+	  	},
+	  	style: {
+	   	 	fg: 'white',
+	    	bg: 'black'  // Blue background so you see this is different from body
+	  	}
+	});
 	body = blessed.box({
-	  top: 0,
+	  top: 1,
 	  left: 0,
-	  height: '100%-1',
+	  height: '100%-2',
 	  width: '100%',
 	  keys: true,
 	  mouse: true,
@@ -52,8 +78,8 @@ function createWindows(){
 	  scrollbar: {
 	    ch: ' ',
 	    bg: 'red'
-	  },
-	  smartCSR: true
+	  }
+	  
 	});
 	inputBar = blessed.textbox({
 	  bottom: 0,
@@ -73,6 +99,7 @@ function createWindows(){
 	// Add body to blessed screen
 	screen.append(body);
 	screen.append(inputBar);
+	screen.append(notification);
 
 	// Close the example on Escape, Q, or Ctrl+C
 	screen.key(['escape', 'q', 'C-c'], (ch, key) => (process.exit(0)));
@@ -107,13 +134,29 @@ function listenCallback(api,id,name){
         if(err) return log(err);    
         for(item in history){
         	if(history[item].senderID == history[item].threadID){
+        		
         		if(history[item].isUnread){
-        			log("\033[1m"+name + " : " + history[item].body);
+        			if(history[item].attachments.length == 0){
+        				log("\033[1m"+name + " : " + history[item].body + "\033[0m");
+        			}else{
+        				log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
+        			}
         		}else{
-        			log(name + " : " + history[item].body);
+        			if(history[item].attachments.length == 0){
+        				log(name + " : " + history[item].body);
+        			}else{
+        				log(name + " : " + history[item].body + " (Sent an attachment)");
+        			}
+        			
         		}
+
+
         	}else{
-        		log(" You : " + history[item].body);
+        		if(history[item].attachments.length == 0){
+    				log("You : " + history[item].body);
+    			}else{
+    				log("You : " + history[item].body + " (Sent an attachment)");
+    			}
         	}
         }
         
@@ -127,32 +170,51 @@ function listenCallback(api,id,name){
 	    	api.getUserInfo(message.senderID,function(err,ret){
 				if(message.senderID == id)
 				
-					
-		            
-		                log(name + " : " + message.body);
-		               	if(message.attachments.length > 0){
-							for(attachment in message.attachments){
-								
-						 		
-								if(message.attachments[attachment].type == "photo"){
-									var dir = './Photo'
-									if (!fs.existsSync(dir)){
-    									fs.mkdirSync(dir);
-									}
-									var dir = './Photo/'+ name;
-
-									if (!fs.existsSync(dir)){
-    									fs.mkdirSync(dir);
-									}
-									download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
-										shell.open(dir + "/" + message.attachments[attachment].name);
-				  						log('a photo sent by ' + name);
-									});
+				{						
+	            
+	                
+	               	if(message.attachments.length > 0){
+						for(attachment in message.attachments){
+							
+					 		
+							if(message.attachments[attachment].type == "photo"){
+								var dir = './Photo'
+								if (!fs.existsSync(dir)){
+									fs.mkdirSync(dir);
 								}
+								var dir = './Photo/'+ name;
+
+								if (!fs.existsSync(dir)){
+									fs.mkdirSync(dir);
+								}
+								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
+									shell.open(dir + "/" + message.attachments[attachment].name);
+			  						log(name + " : " + message.body + "(sent an attachment)");
+								});
 							}
-						} 	
-		            
-	        	
+						}
+					}else{
+						log(name + " : " + message.body);
+					} 	
+	            
+	        	}else{
+	        		api.getUserInfo(message.senderID, (err, ret) => {
+				        if(err) return log(err);
+
+				        for(var prop in ret) {
+				            if(ret.hasOwnProperty(prop)) {
+				            	if(message.attachments.length == 0)
+				                {
+				                	
+				                	lognotification(ret[prop].name + " : " + message.body);
+			                	}else{
+			                		
+			                		lognotification(ret[prop].name + " : Sent an attachment");	
+			                	}
+				            }
+				        }
+    				});
+	        	}
 				
 
 	    	});
@@ -198,8 +260,6 @@ function sendmessage(err, api,ask){
 
 var download = function(uri, filename, callback){
   request.head(uri, function(err, res, body){
-    console.log('content-type:', res.headers['content-type']);
-    console.log('content-length:', res.headers['content-length']);
     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
   });
 };

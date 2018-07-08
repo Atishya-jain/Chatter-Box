@@ -12,9 +12,12 @@
     "blessed": "^0.1.81",
     "facebook-chat-api": "^1.6.0",
     "fs": "0.0.1-security",
+    "pty": "0.0.0",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.9",
     "request": "^2.87.0",
-    "shelljs": "^0.8.2"
+    "shelljs": "^0.8.2",
+    "shelljs-plugin-open": "^0.2.0",
+    "term.js": "0.0.7"
   }
 }
