@@ -53,14 +53,14 @@ function getFriendList(api){
 
 		FirendList = data;
 	    id = Input.getName(data);
-    	console.log(id);
+    	//console.log(id);
     	userid = data[id].userID;
     	name = data[id].fullName;	
     	listenCallback(api,userid,name);
 	    });
     }else{
 	    id = Input.getName(FirendList);
-    	console.log(id);
+    	//console.log(id);
     	userid = FirendList[id].userID;
     	name = FirendList[id].fullName;	
     	listenCallback(api,userid,name);    	
