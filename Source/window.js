@@ -87,8 +87,7 @@ function createWindows(){
 	// Close the example on Escape, Q, or Ctrl+C
 	screen.key(['escape', 'q', 'C-c'], (ch, key) => (process.exit(0)));
 	inputBar.key(['escape', 'C-c'], (ch, key) => (process.exit(0)));
-
-	
+	screen.render();
 }
 
 function log(text) {

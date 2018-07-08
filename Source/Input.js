@@ -37,7 +37,7 @@ function GetCredentials(){
 function getName(data){
 	name = readline.question("Enter name of the person you want to chat with: ");
     id = searchStringInArray(name, data);
-    if(id == -1){
+    if(id.length == 0){
     	console.log("You entered the wrong name.");
     	return getName(data);
     }else{
@@ -48,14 +48,34 @@ function getName(data){
 // Function to match name entered with a list of names.
 // ToDo: Change this to regex matching
 function searchStringInArray (str, strArray) {
+	nameList = [];
     for (var j=0; j<strArray.length; j++) {
-        if (strArray[j].fullName.toLowerCase().match(str.toLowerCase())) return j;
+        if (strArray[j].fullName.toLowerCase().match(str.toLowerCase())) nameList.push(j);
     }
-    return -1;
+    if(nameList.length == 0){
+	    return -1;
+    }else{
+    	return nameList;
+    }
+}
+
+function GetSingleOption(id, data){
+	dummy = []
+	for(var i = 0; i< id.length; i++){
+		dummy.push(data[id[i]]);
+		console.log((i+1) + " " + data[id[i]].fullName);
+	}
+	pos = readline.question("Enter S.No. of the person you want to chat with: ");
+	if((pos > 0) && (pos < (id.length + 1))){
+		return [dummy[pos-1].userID, dummy[pos-1].fullName];
+	}else{
+		console.log("Wrong option. Please try again.");
+		return GetSingleOption(id, data);
+	}	
 }
 
 module.exports = {
 	'GetCredentials': GetCredentials,
-//	'ask': ask,
+	'GetSingleOption': GetSingleOption,
 	'getName':getName
 }

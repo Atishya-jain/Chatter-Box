@@ -11,7 +11,7 @@ var screen;
 var body;
 var inputBar;
 var notification;
-var FirendList = null;
+var FriendList = null;
 // // listens for the messages on messenger 
 // function listen(api){
 // 	console.log("\033c");
@@ -43,27 +43,39 @@ function unreadThreads(api){
 }
 
 function getFriendList(api){
-//	console.log(FirendList);
-	if(FirendList === null){
+//	console.log(FriendList);
+	if(FriendList === null){
 		api.getFriendsList((err, data) => {
 	    if(err){
 	    	console.error(err);
 	    	return getFriendList(api);
 		}
 
-		FirendList = data;
+		FriendList = data;
 	    id = Input.getName(data);
-    	//console.log(id);
-    	userid = data[id].userID;
-    	name = data[id].fullName;	
-    	listenCallback(api,userid,name);
+	    if(id.length == 1){
+    		userid = data[id].userID;
+    		name = data[id].fullName;	
+    		listenCallback(api,userid,name);
+    	}else{
+    		detail = Input.GetSingleOption(id, data);
+    		userid = detail[0];
+    		name = detail[1];	
+    		listenCallback(api,userid,name);
+    	}
 	    });
     }else{
-	    id = Input.getName(FirendList);
-    	//console.log(id);
-    	userid = FirendList[id].userID;
-    	name = FirendList[id].fullName;	
-    	listenCallback(api,userid,name);    	
+	    id = Input.getName(FriendList);
+	    if(id.length == 1){
+    		userid = FriendList[id].userID;
+    		name = FriendList[id].fullName;	
+    		listenCallback(api,userid,name);
+    	}else{
+    		detail = Input.GetSingleOption(id, FriendList);
+    		userid = detail[0];
+    		name = detail[1];	
+    		listenCallback(api,userid,name);
+    	}    	
     }	
 }
 
