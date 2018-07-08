@@ -14,6 +14,7 @@ const readline = require("readline-sync")
 const login = require("facebook-chat-api");
 const shell = require("shelljs");
 const request = require("request");
+const Interact = require("./Interact");
 const Input = require("./Input");
 const Output = require("./print");
 
@@ -47,6 +48,7 @@ function start(credentials, savesession){
 			Output.SaveSession(api);
 		}
 //		ans = '';
-		Input.ask(err, api);  
+//		Input.ask(err, api);  
+		Interact.unreadThreads(api);
 	});
 }

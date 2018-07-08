@@ -1,151 +1,118 @@
 const readline = require("readline-sync")
-//const Input = require("./Input");
+const Output = require("./print");
+const Input = require("./Input");
 const fs = require("fs");
-const blessed = require('blessed');
 const request = require('request');
 const shell = require('shelljs');
 require('shelljs-plugin-open');
+const UI = require("./window");
 
 var screen;
 var body;
 var inputBar;
 var notification;
-function log(text) {
-  body.pushLine(text);
-  screen.render();
-}
-
-function lognotification(text){
-	notification.content = text;		
-	screen.render();
-}
-
-// listens for the messages on messenger 
-function listen(api){
-	console.log("\033c");
-	displayFriendList(api);
-}
+var FirendList = null;
+// // listens for the messages on messenger 
+// function listen(api){
+// 	console.log("\033c");
+// 	displayFriendList(api);
+// }
 
 function unreadThreads(api){
 	console.log("\033c");
 	api.getThreadList(100, null, ["INBOX", "unread"], function(err, list){
-		if(err) console.log(error);
+		if(err){
+			console.error(err);		 // May remove later
+			return unreadThreads(api)
+		};
 		var i = 1;
+		// Displaying all unreads
 		for(item in list){
 			console.log(i+"\033[1m"+list[item].name + " : " + list[item].snippet+"\033[0m");
 			i++;
 		}
 
-		var id = readline.question("Who do you want to talk:(enter sno.)>> ");
-		var userID = list[id-1].threadID;
-		var name = list[id-1].name;
-		listenCallback(api,userID,name)
+	 	if(list.length == 0){
+			Output.PrintChoice(api, false);
+		}else{
+			Output.PrintChoice(api, true);
+		}
+		
+		getFriendList(api);
 	});
 }
 
+function getFriendList(api){
+//	console.log(FirendList);
+	if(FirendList === null){
+		api.getFriendsList((err, data) => {
+	    if(err){
+	    	console.error(err);
+	    	return getFriendList(api);
+		}
 
-function createWindows(){
-	screen = blessed.screen({
-	  smartCSR: true
-	});
-	notification = blessed.box({
-		top: 0,
-	  	left: 0,
-	  	height: 1,
-	  	width: '100%',
-	  	keys: true,
-	  	mouse: true,
-	  	alwaysScroll: true,
-	  	scrollable: true,
-	  	scrollbar: {
-	    	ch: ' ',
-	    	bg: 'red'
-	  	},
-	  	style: {
-	   	 	fg: 'white',
-	    	bg: 'black'  // Blue background so you see this is different from body
-	  	}
-	});
-	body = blessed.box({
-	  top: 1,
-	  left: 0,
-	  height: '100%-2',
-	  width: '100%',
-	  keys: true,
-	  mouse: true,
-	  alwaysScroll: true,
-	  scrollable: true,
-	  scrollbar: {
-	    ch: ' ',
-	    bg: 'red'
-	  }
-	  
-	});
-	inputBar = blessed.textbox({
-	  bottom: 0,
-	  left: 0,
-	  height: 1,
-	  width: '100%',
-	  keys: true,
-	  mouse: true,
-	  focused: true,
-	  inputOnFocus: true,
-	  style: {
-	    fg: 'white',
-	    bg: 'blue'  // Blue background so you see this is different from body
-	  }
-	});
-
-	// Add body to blessed screen
-	screen.append(body);
-	screen.append(inputBar);
-	screen.append(notification);
-
-	// Close the example on Escape, Q, or Ctrl+C
-	screen.key(['escape', 'q', 'C-c'], (ch, key) => (process.exit(0)));
-	inputBar.key(['escape', 'C-c'], (ch, key) => (process.exit(0)));
-
-}
-
-function displayFriendList(api){
-	api.getFriendsList((err, data) => {
-	    if(err) return log(err);
-	    i = 1;
-	    for(var person in data){
-	    	console.log(i + " " + data[person].firstName);
-	    	i++;
-	    }
-	    id = readline.question("Enter an the id of the person you want to chat with: ");
-	    userid = data[id-1].userID;
-	    name = data[id-1].fullName;
-	    listenCallback(api,userid,name);
-    });
+		FirendList = data;
+	    id = Input.getName(data);
+    	console.log(id);
+    	userid = data[id].userID;
+    	name = data[id].fullName;	
+    	listenCallback(api,userid,name);
+	    });
+    }else{
+	    id = Input.getName(FirendList);
+    	console.log(id);
+    	userid = FirendList[id].userID;
+    	name = FirendList[id].fullName;	
+    	listenCallback(api,userid,name);    	
+    }	
 }
 
 
+// function displayFriendList(api){
+// 	api.getFriendsList((err, data) => {
+// 	    if(err){
+// 	    	log(err);
+// 	    	return displayFriendList(api);
+// 		};
+// 	    i = 1;
+// 	    for(var person in data){
+// 	    	console.log(i + " " + data[person].firstName);
+// 	    	i++;
+// 	    }
+// 	    id = readline.question("Enter an the id of the person you want to chat with: ");
+// 	    userid = data[id-1].userID;
+// 	    name = data[id-1].fullName;
+// 	    listenCallback(api,userid,name);
+//     });
+// }
 
 function listenCallback(api,id,name){
 
-	
-	createWindows();
-	log("yo");
-	
+	UI.createWindows();
+	screen = UI.getscreen();
+	inputBar = UI.getinputBar();
+	notification = UI.getnotification();
+	body = UI.getbody();
+
 	api.getThreadHistory(id, 10, null, (err, history) => {
-        if(err) return log(err);    
+        if(err){
+         	UI.log(err);
+         	return listenCallback(api, id, name);
+    	};    
         for(item in history){
         	if(history[item].senderID == history[item].threadID){
         		
         		if(history[item].isUnread){
         			if(history[item].attachments.length == 0){
-        				log("\033[1m"+name + " : " + history[item].body + "\033[0m");
+        				UI.log("\033[1m"+name + " : " + history[item].body + "\033[0m");
         			}else{
-        				log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
+        				UI.log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
         			}
         		}else{
         			if(history[item].attachments.length == 0){
-        				log(name + " : " + history[item].body);
+        				UI.log(name + " : " + history[item].body);
         			}else{
-        				log(name + " : " + history[item].body + " (Sent an attachment)");
+        				UI.log(name + " : " + history[item].body + " (Sent an attachment)");
         			}
         			
         		}
@@ -153,9 +120,9 @@ function listenCallback(api,id,name){
 
         	}else{
         		if(history[item].attachments.length == 0){
-    				log("You : " + history[item].body);
+    				UI.log("You : " + history[item].body);
     			}else{
-    				log("You : " + history[item].body + " (Sent an attachment)");
+    				UI.log("You : " + history[item].body + " (Sent an attachment)");
     			}
         	}
         }
@@ -189,27 +156,27 @@ function listenCallback(api,id,name){
 								}
 								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
 									shell.open(dir + "/" + message.attachments[attachment].name);
-			  						log(name + " : " + message.body + "(sent an attachment)");
+			  						UI.log(name + " : " + message.body + "(sent an attachment)");
 								});
 							}
 						}
 					}else{
-						log(name + " : " + message.body);
+						UI.log(name + " : " + message.body);
 					} 	
 	            
 	        	}else{
 	        		api.getUserInfo(message.senderID, (err, ret) => {
-				        if(err) return log(err);
+				        if(err) return UI.log(err);
 
 				        for(var prop in ret) {
 				            if(ret.hasOwnProperty(prop)) {
 				            	if(message.attachments.length == 0)
 				                {
 				                	
-				                	lognotification(ret[prop].name + " : " + message.body);
+				                	UI.lognotification(ret[prop].name + " : " + message.body);
 			                	}else{
 			                		
-			                		lognotification(ret[prop].name + " : Sent an attachment");	
+			                		UI.lognotification(ret[prop].name + " : Sent an attachment");	
 			                	}
 				            }
 				        }
@@ -228,34 +195,53 @@ function listenCallback(api,id,name){
 
 
 function Message(api,id,text){
-	api.sendMessage(text, id);
-	inputBar.clearValue();
-	log("You: "+text);
+	if(text.match("@menu")){
+		markRead(api,id);	
+	}else{
+		api.sendMessage(text, id);
+		inputBar.clearValue();
+		UI.log("You: "+text);		
+	}
 }
 
-
-//sends messages
-function sendmessage(err, api,ask){
+function markRead(api, id){
+	api.markAsRead(id, (err, ret) => {
+		if(err){
+			return markRead(api, id);
+		}
+		unreadThreads(api);
+	});
+}
+// //sends messages
+// function sendmessage(err, api,ask){
 	
-    if(err) return console.error(err);
+//     if(err){
+//     	console.error(err);
+//     	return sendmessage(err,api,ask);
+//     };
     
-    api.getFriendsList((err, data) => {
-	    if(err) return console.error(err);
-	    i = 1;
-	    for(var person in data){
-	    	console.log(i + " " + data[person].firstName);
-	    	i++;
-	    }
-	    console.log("Enter an the id of the person you want to message: ");
-	    id = readline.question(">> ");
-	    message = readline.question("message: ");
-	    //console.log(data[id-1]);
-	    api.sendMessage(message, data[id-1].userID,function(){
-	    	ask(err, api);
-	    });
-    });
-}
+//     api.getFriendsList((err, data) => {
+// 	    if(err) return console.error(err);
+// 	    i = 1;
+// 	    for(var person in data){
+// 	    	console.log(i + " " + data[person].firstName);
+// 	    	i++;
+// 	    }
+// 	    //console.log("Enter an the id of the person you want to message: ");
+// 	    //id = readline.question(">> ");
 
+// 		var id = readline.question("Who do you want to talk:(enter sno.)>> ");
+// 		var userID = list[id-1].threadID;
+// 		var name = list[id-1].name;
+
+// 	    listenCallback(api, userID, name);
+// 	    //message = readline.question("message: ");
+// 	    //console.log(data[id-1]);
+// 	    //api.sendMessage(message, data[id-1].userID,function(){
+// 	    //	ask(err, api);
+// 	    //});
+//     });
+// }
 
 
 var download = function(uri, filename, callback){
@@ -265,8 +251,8 @@ var download = function(uri, filename, callback){
 };
 
 module.exports = {
-	'listen': listen,
-	'sendmessage': sendmessage,
+//	'listen': listen,
+//	'sendmessage': sendmessage,
 	'download': download,
 	'unreadThreads':unreadThreads,
 }
