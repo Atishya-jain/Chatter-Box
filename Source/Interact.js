@@ -104,13 +104,17 @@ function listenCallback(api,id,name){
 	screen = UI.getscreen();
 	inputBar = UI.getinputBar();
 	notification = UI.getnotification();
+	button = UI.getButton();
 	body = UI.getbody();
-
+	
 	api.getThreadHistory(id, 10, null, (err, history) => {
         if(err){
          	UI.log(err);
          	return listenCallback(api, id, name);
     	};    
+    	if(history.length == 0){
+    		UI.log("start a new conversation...");
+    	}
         for(item in history){
         	if(history[item].senderID == history[item].threadID){
         		
@@ -140,6 +144,7 @@ function listenCallback(api,id,name){
         }
         
     });
+    UI.log("yo");
     api.listen((err, message) => {
     	
 		if(message){
@@ -203,6 +208,48 @@ function listenCallback(api,id,name){
 	inputBar.on("submit",function(text){
 		Message(api,id,text);
     });
+    button.on("click",function(){
+    	sendImage(api,id);
+    });
+}
+
+function sendImage(api,id){
+	send = UI.getSend();
+	screen = UI.getscreen();
+	UI.log("copy past the doc in the folder opened ")
+	shell.mkdir('-p' , './sent');
+	var dir = './SentItem'
+	if (!fs.existsSync(dir)){
+		fs.mkdirSync(dir);
+	}
+	shell.open("sent");
+	screen.append(send);
+	UI.log("Press the green button when done...");
+	send.on("click",function(){
+		files = shell.ls('sent');
+    	messages = [];
+	    for(var file = 0 ; file < files.length ; file++)
+	    {
+    		var attch = fs.createReadStream("sent/"+shell.ls('sent')[file]);
+	    	var message = {
+		    	body: "",
+		    	// console.log(shell.ls('sent')[0]);
+		    	
+	        	attachment: attch
+
+    		}	
+
+    		messages.push(message);
+	    }
+	    // fs.appendFile("SentItem/"+shell.ls('sent')[file], attch,function(){});
+	    // copyFile("sent/"+shell.ls('sent')[file],'SentItem');
+    	// shell.rm('-rf','sent');
+	    // console.log(data[id-1]);
+	    api.sendMessage(message, id);
+		send.destroy();
+		UI.log("You: (sent an attachment)");
+		shell.rm('-rf','sent')
+	});
 }
 
 
@@ -225,6 +272,21 @@ function markRead(api, id){
 		unreadThreads(api);
 	});
 }
+
+var copyFile = (file, dir2)=>{
+  //include the fs, path modules
+  var fs = require('fs');
+  var path = require('path');
+
+  //gets file name and adds it to dir2
+  var f = path.basename(file);
+  var source = fs.createReadStream(file);
+  var dest = fs.createWriteStream(path.resolve(dir2, f));
+
+  source.pipe(dest);
+  source.on('end', function() { console.log('Succesfully copied'); });
+  source.on('error', function(err) { console.log(err); });
+};
 // //sends messages
 // function sendmessage(err, api,ask){
 	

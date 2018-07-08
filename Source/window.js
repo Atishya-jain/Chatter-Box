@@ -4,6 +4,8 @@ var screen;
 var body;
 var inputBar;
 var notification;
+var button;
+var send;
 
 function createWindows(){
 	screen = blessed.screen({
@@ -42,11 +44,13 @@ function createWindows(){
 	  }
 	  
 	});
+
+
 	inputBar = blessed.textbox({
 	  bottom: 0,
 	  left: 0,
 	  height: 1,
-	  width: '100%',
+	  width: '100%-5',
 	  keys: true,
 	  mouse: true,
 	  focused: true,
@@ -57,20 +61,38 @@ function createWindows(){
 	  }
 	});
 
+	button = blessed.button({
+		bottom: 0,
+		right: 0,
+		height: 1,
+		width: 5,
+		keys: true,
+		mouse: true,
+		focused: true,
+		inputOnFocus: true,
+		style: {
+			fg: 'white',
+			bg: 'red'  // Blue background so you see this is different from body
+		}
+	});
+	
 	// Add body to blessed screen
 	screen.append(body);
 	screen.append(inputBar);
 	screen.append(notification);
+	screen.append(button);
+	
+
 
 	// Close the example on Escape, Q, or Ctrl+C
 	screen.key(['escape', 'q', 'C-c'], (ch, key) => (process.exit(0)));
 	inputBar.key(['escape', 'C-c'], (ch, key) => (process.exit(0)));
-  screen.render();
-
+	screen.render();
 }
 
 function log(text) {
   body.pushLine(text);
+  screen.render();
 }
 
 function lognotification(text){
@@ -93,6 +115,30 @@ function getscreen(){
 function getnotification(){
 	return notification;
 }
+
+function getButton(){
+	return button;
+}
+
+function getSend(){
+	send = blessed.button({
+		
+		bottom: 0,
+		right: 5,
+		height: 1,
+		width: 5,
+		keys: true,
+		mouse: true,
+		focused: true,
+		inputOnFocus: true,
+		style: {
+			fg: 'white',
+			bg: 'green'  // Blue background so you see this is different from body
+		}
+	});
+	return send;
+}
+
 module.exports = {
 	'log':log,
 	'lognotification':lognotification,
@@ -100,5 +146,7 @@ module.exports = {
 	'getnotification': getnotification,
 	'getscreen':getscreen,
 	'getbody':getbody,
-	'getinputBar':getinputBar
+	'getinputBar':getinputBar,
+	'getButton':getButton,
+	'getSend':getSend
 }
