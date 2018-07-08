@@ -81,6 +81,7 @@ function createWindows(){
 	screen.append(inputBar);
 	screen.append(notification);
 	screen.append(button);
+	inputBar.focus();
 	
 
 

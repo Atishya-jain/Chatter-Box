@@ -6,6 +6,7 @@ const request = require('request');
 const shell = require('shelljs');
 require('shelljs-plugin-open');
 const UI = require("./window");
+var opn = require('opn');
 
 var screen;
 var body;
@@ -207,6 +208,7 @@ function listenCallback(api,id,name){
 
 	inputBar.on("submit",function(text){
 		Message(api,id,text);
+		inputBar.focus();
     });
     button.on("click",function(){
     	sendImage(api,id);
@@ -233,7 +235,7 @@ function sendImage(api,id){
     		
 	    	var message = {
 		    	body: "",
-		    	// console.log(shell.ls('sent')[0]);
+		    	// console.log(shell.ls('sent')[]);
 		    	
 	        	attachment: fs.createReadStream("sent/"+shell.ls('sent')[file]),
 
@@ -260,11 +262,17 @@ function Message(api,id,text){
 	if(text.match("@menu")){
 		screen.destroy();
 		markRead(api,id);	
+	}else if("@displaydp"){
+		displaydp(id);
 	}else{
 		api.sendMessage(text, id);
 		inputBar.clearValue();
 		UI.log("You: "+text);		
 	}
+}
+
+function displaydp(id){
+	opn("https://graph.facebook.com/"+id+"/picture?type=large&redirect=true&width=500&height=500");
 }
 
 function markRead(api, id){
