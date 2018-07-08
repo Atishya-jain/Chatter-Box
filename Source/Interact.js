@@ -218,25 +218,28 @@ function sendImage(api,id){
     	messages = [];
 	    for(var file = 0 ; file < files.length ; file++)
 	    {
-    		var attch = fs.createReadStream("sent/"+shell.ls('sent')[file]);
+    		
 	    	var message = {
 		    	body: "",
 		    	// console.log(shell.ls('sent')[0]);
 		    	
-	        	attachment: attch
+	        	attachment: fs.createReadStream("sent/"+shell.ls('sent')[file]),
 
     		}	
 
-    		messages.push(message);
+    		api.sendMessage(message, id,function(){
+	    		UI.log("You: (sent an attachment)");
+    			shell.rm('-rf',"sent/"+shell.ls('sent')[file]);
+	    	});
 	    }
 	    // fs.appendFile("SentItem/"+shell.ls('sent')[file], attch,function(){});
 	    // copyFile("sent/"+shell.ls('sent')[file],'SentItem');
     	// shell.rm('-rf','sent');
 	    // console.log(data[id-1]);
-	    api.sendMessage(message, id);
+	    
 		send.destroy();
-		UI.log("You: (sent an attachment)");
-		shell.rm('-rf','sent')
+		
+		
 	});
 }
 
@@ -272,8 +275,8 @@ var copyFile = (file, dir2)=>{
   var dest = fs.createWriteStream(path.resolve(dir2, f));
 
   source.pipe(dest);
-  source.on('end', function() { console.log('Succesfully copied'); });
-  source.on('error', function(err) { console.log(err); });
+  
+  
 };
 // //sends messages
 // function sendmessage(err, api,ask){
