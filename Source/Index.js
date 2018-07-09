@@ -38,17 +38,27 @@ function FBLogin(){
 // login in using the credentials
 function start(credentials, savesession){
 	login(credentials, (err, api) => {
+		api.setOptions({
+	    		logLevel: "silent"
+			});
 	    if(err) return FBLogin();
 		
 		if(!savesession){
-			api.setOptions({
-	    		logLevel: "silent"
-			});
+			
 		}else{
 			Output.SaveSession(api);
 		}
 //		ans = '';
 //		Input.ask(err, api);
-		Interact.unreadThreads(api);
+		var choice;
+		choice = readline.question("1)Display Unread Threads and choose friend\n2)Choose Group\n->");
+		if(choice == 1){
+			Interact.unreadThreads(api);	
+		}else{
+			Interact.displaygroups(api);	
+		}
+		
+		
+
 	});
 }

@@ -1,11 +1,14 @@
 const blessed = require('blessed');
 
+
 var screen;
 var body;
 var inputBar;
 var notification;
 var button;
 var send;
+
+
 
 function createWindows(){
 	screen = blessed.screen({
@@ -14,7 +17,7 @@ function createWindows(){
 	notification = blessed.box({
 		top: 0,
 	  	left: 0,
-	  	height: 1,
+	  	height: 3,
 	  	width: '100%',
 	  	keys: true,
 	  	mouse: true,
@@ -24,15 +27,14 @@ function createWindows(){
 	    	ch: ' ',
 	    	bg: 'red'
 	  	},
-	  	style: {
-	   	 	fg: 'white',
-	    	bg: 'black'  // Blue background so you see this is different from body
-	  	}
+	  	border: {
+    		type: 'line'
+  		}
 	});
 	body = blessed.box({
-	  top: 1,
-	  left: 0,
-	  height: '100%-2',
+	  top: 3,
+	  right: 0,
+	  height: '100%-7',
 	  width: '100%',
 	  keys: true,
 	  mouse: true,
@@ -41,31 +43,36 @@ function createWindows(){
 	  scrollbar: {
 	    ch: ' ',
 	    bg: 'red'
-	  }
-	  
+	  },
+	  border: {
+    		type: 'line'
+  		}
 	});
 
+
+
+	
 
 	inputBar = blessed.textbox({
 	  bottom: 0,
 	  left: 0,
-	  height: 1,
-	  width: '100%-5',
+	  height: 3,
+	  width: '100%',
 	  keys: true,
 	  mouse: true,
 	  focused: true,
 	  inputOnFocus: true,
-	  style: {
-	    fg: 'white',
-	    bg: 'blue'  // Blue background so you see this is different from body
-	  }
+	  border: {
+    		type: 'line'
+  		}
 	});
 
+
 	button = blessed.button({
-		bottom: 0,
+		bottom: 1,
 		right: 0,
 		height: 1,
-		width: 5,
+		width: 10,
 		keys: true,
 		mouse: true,
 		focused: true,
@@ -73,7 +80,8 @@ function createWindows(){
 		style: {
 			fg: 'white',
 			bg: 'red'  // Blue background so you see this is different from body
-		}
+		},
+		content: "send Image"
 	});
 	
 	// Add body to blessed screen
@@ -88,6 +96,7 @@ function createWindows(){
 	// Close the example on Escape, Q, or Ctrl+C
 	screen.key(['escape', 'q', 'C-c'], (ch, key) => (process.exit(0)));
 	inputBar.key(['escape', 'C-c'], (ch, key) => (process.exit(0)));
+
 	screen.render();
 }
 
@@ -95,6 +104,8 @@ function log(text) {
   body.pushLine(text);
   screen.render();
 }
+
+
 
 function lognotification(text){
 	notification.content = text;		
@@ -119,6 +130,14 @@ function getnotification(){
 
 function getButton(){
 	return button;
+}
+
+function getthreads(){
+	return threads;
+}
+
+function getchats(){
+	return chats;
 }
 
 function getSend(){
@@ -150,5 +169,5 @@ module.exports = {
 	'getbody':getbody,
 	'getinputBar':getinputBar,
 	'getButton':getButton,
-	'getSend':getSend
+	'getSend':getSend,
 }

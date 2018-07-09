@@ -6,9 +6,9 @@ var screen = blessed.screen({
 });
 var body = blessed.box({
   top: 0,
-  left: 0,
+  right: 0,
   height: '100%-1',
-  width: '100%',
+  width: '70%',
   keys: true,
   mouse: true,
   alwaysScroll: true,
@@ -16,6 +16,24 @@ var body = blessed.box({
   scrollbar: {
     ch: ' ',
     bg: 'red'
+  },
+  smartCSR: true
+});
+var body2 = blessed.box({
+  top: 0,
+  left: 0,
+  height: '100%-1',
+  width: '30%',
+  keys: true,
+  mouse: true,
+  alwaysScroll: true,
+  scrollable: true,
+  scrollbar: {
+    ch: ' ',
+    bg: 'red'
+  },
+  border:{
+    type: 'line'
   },
   smartCSR: true
 });
@@ -36,6 +54,7 @@ var inputBar = blessed.textbox({
 
 // Add body to blessed screen
 screen.append(body);
+body.append(body2);
 screen.append(inputBar);
 
 // Close the example on Escape, Q, or Ctrl+C

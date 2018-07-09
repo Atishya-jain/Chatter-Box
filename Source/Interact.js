@@ -7,12 +7,14 @@ const shell = require('shelljs');
 require('shelljs-plugin-open');
 const UI = require("./window");
 var opn = require('opn');
+var blessed = require('blessed');
 
 var screen;
 var body;
 var inputBar;
 var notification;
 var FriendList = null;
+var GroupList = null;
 // // listens for the messages on messenger 
 // function listen(api){
 // 	console.log("\033c");
@@ -70,7 +72,8 @@ function getFriendList(api){
 	    if(id.length == 1){
     		userid = FriendList[id].userID;
     		name = FriendList[id].fullName;	
-    		listenCallback(api,userid,name);
+    		listenCallback(api,userid,name
+    			);
     	}else{
     		detail = Input.GetSingleOption(id, FriendList);
     		userid = detail[0];
@@ -108,10 +111,13 @@ function listenCallback(api,id,name){
 	button = UI.getButton();
 	body = UI.getbody();
 	
+	
+
 	api.getThreadHistory(id, 10, null, (err, history) => {
-                	
+ 
         for(item in history){
-        	if(history[item].senderID == history[item].threadID){
+        	
+    		if(history[item].senderID == history[item].threadID){
         		
         		if(history[item].isUnread){
         			if(history[item].attachments.length == 0){
@@ -209,6 +215,132 @@ function listenCallback(api,id,name){
     });
 }
 
+function groupListenCallback(api,id){
+	var groupMember;
+	api.getThreadInfo(id,function(err,info){
+		var ids = info.participantIDs;
+		names = [];
+		api.getUserInfo(ids, (err, ret) => {
+	        for(var prop in ret) {
+	            if(ret.hasOwnProperty(prop)) {
+	                names.push(ret[prop].name);
+	                
+	            }
+	        }
+	        
+	        startGroupChat(api,ids,names,id);
+	    });
+		
+	});
+}
+
+function startGroupChat(api,ids,names,id){
+	UI.createWindows();
+	screen = UI.getscreen();
+	inputBar = UI.getinputBar();
+	notification = UI.getnotification();
+	button = UI.getButton();
+	body = UI.getbody();
+	
+	
+
+	api.getThreadHistory(id, 10, null, (err, history) => {
+ 		UI.log("yo");
+        for(item in history){
+        	
+    		name = names[ids.indexOf(history[item].senderID)];
+
+        		
+        		if(history[item].isUnread){
+        			if(history[item].attachments.length == 0){
+        				UI.log("\033[1m"+name + " : " + history[item].body + "\033[0m");
+        			}else{
+        				UI.log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
+        			}
+        		}else{
+        			if(history[item].attachments.length == 0){
+        				UI.log(name + " : " + history[item].body);
+        			}else{
+        				UI.log(name + " : " + history[item].body + " (Sent an attachment)");
+        			}
+        			
+        		}
+
+
+        	
+    	}
+    	
+	});
+
+	api.listen((err, message) => {
+    	
+		if(message){
+			
+
+			// get the username by using senderID that we received from the message
+	    	api.getUserInfo(message.threadID,function(err,ret){
+				if(message.threadID == id)
+				
+				{						
+	            
+	                name = names[ids.indexOf(message.senderID)];
+	               	if(message.attachments.length > 0){
+						for(attachment in message.attachments){
+							
+					 		
+							if(message.attachments[attachment].type == "photo"){
+								var dir = './Photo'
+								if (!fs.existsSync(dir)){
+									fs.mkdirSync(dir);
+								}
+								var dir = './Photo/'+ name;
+
+								if (!fs.existsSync(dir)){
+									fs.mkdirSync(dir);
+								}
+								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
+									shell.open(dir + "/" + message.attachments[attachment].name);
+			  						UI.log(name + " : " + message.body + "(sent an attachment)");
+								});
+							}
+						}
+					}else{
+						UI.log(name + " : " + message.body);
+					} 	
+	            
+	        	}else{
+	        		api.getUserInfo(message.senderID, (err, ret) => {
+				        if(err) return UI.log(err);
+
+				        for(var prop in ret) {
+				            if(ret.hasOwnProperty(prop)) {
+				            	if(message.attachments.length == 0)
+				                {
+				                	
+				                	UI.lognotification(ret[prop].name + " : " + message.body);
+			                	}else{
+			                		
+			                		UI.lognotification(ret[prop].name + " : Sent an attachment");	
+			                	}
+				            }
+				        }
+    				});
+	        	}
+				
+
+	    	});
+    	}
+    });
+    inputBar.on("submit",function(text){
+		Message(api,id,text);
+		inputBar.focus();
+    });
+    button.on("click",function(){
+    	sendImage(api,id);
+    });
+}
+
+
 function sendImage(api,id){
 	send = UI.getSend();
 	screen = UI.getscreen();
@@ -253,15 +385,58 @@ function sendImage(api,id){
 
 
 function Message(api,id,text){
+	
 	if(text.match("@menu")){
 		screen.destroy();
 		markRead(api,id);	
 	}else if(text.match("@displaydp")){
 		displaydp(id);
+		inputBar.clearValue();
+		
+	}else if(text.match("@groups")){
+		screen.destroy(function(){displaygroups(api)});
+		
+		
 	}else{
 		api.sendMessage(text, id);
 		inputBar.clearValue();
 		UI.log("You: "+text);		
+	}
+
+}
+
+function displaygroups(api){
+	// console.log("\033c");
+	if(GroupList == null){
+		GroupList = [];
+		api.getThreadList(1000, null, [], function(err,list){
+			for(item in list){
+				if(list[item].isGroup && list[item].name){
+					GroupList.push(list[item]);
+				}
+			}
+			// UI.log(GroupList);
+			console.log("Your Gropus are ...... ");
+			var i = 1;
+			for(group in GroupList){
+				
+				if(GroupList[group].name)
+				{					
+					console.log(i + GroupList[group].name);
+					i = i + 1;
+				}		
+			}
+			id = readline.question("which group do you want to chat with:");
+			id = GroupList[id-1].threadID;	
+			groupListenCallback(api,id);
+		});
+	}
+	else{
+		for(group in GroupList){
+				if(GroupList[group].name)
+				console.log(GroupList[group].name);
+				groupListenCallback(api,id);
+			}
 	}
 }
 
@@ -330,9 +505,13 @@ var download = function(uri, filename, callback){
   });
 };
 
+
+
+
 module.exports = {
 //	'listen': listen,
 //	'sendmessage': sendmessage,
+	'displaygroups': displaygroups,
 	'download': download,
 	'unreadThreads':unreadThreads,
 }
