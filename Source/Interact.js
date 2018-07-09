@@ -15,6 +15,7 @@ var inputBar;
 var notification;
 var FriendList = null;
 var GroupList = null;
+var send;
 // // listens for the messages on messenger 
 // function listen(api){
 // 	console.log("\033c");
@@ -241,7 +242,7 @@ function startGroupChat(api,ids,names,id){
 	notification = UI.getnotification();
 	button = UI.getButton();
 	body = UI.getbody();
-	
+	send = UI.getSend();
 	
 
 	api.getThreadHistory(id, 10, null, (err, history) => {
@@ -343,7 +344,7 @@ function startGroupChat(api,ids,names,id){
 
 function sendImage(api,id){
 	send = UI.getSend();
-	screen = UI.getscreen();
+	//screen = UI.getscreen();
 	UI.log("copy past the doc in the folder opened ")
 	shell.mkdir('-p' , './sent');
 	var dir = './SentItem'
