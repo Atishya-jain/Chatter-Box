@@ -109,13 +109,7 @@ function listenCallback(api,id,name){
 	body = UI.getbody();
 	
 	api.getThreadHistory(id, 10, null, (err, history) => {
-        if(err){
-         	UI.log(err);
-         	return listenCallback(api, id, name);
-    	};    
-    	if(history.length == 0){
-    		UI.log("start a new conversation...");
-    	}
+                	
         for(item in history){
         	if(history[item].senderID == history[item].threadID){
         		
@@ -262,7 +256,7 @@ function Message(api,id,text){
 	if(text.match("@menu")){
 		screen.destroy();
 		markRead(api,id);	
-	}else if("@displaydp"){
+	}else if(text.match("@displaydp")){
 		displaydp(id);
 	}else{
 		api.sendMessage(text, id);
