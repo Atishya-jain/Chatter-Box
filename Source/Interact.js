@@ -17,6 +17,7 @@ var FriendList = null;
 var GroupList = null;
 var send;
 var unreadThreadsList = null;
+var issendImage = false;
 // // listens for the messages on messenger 
 // function listen(api){
 // 	console.log("\033c");
@@ -252,8 +253,15 @@ function listenCallback(api,id,name){
     });
 
 	inputBar.on("submit",function(text){
-		Message(api,id,text);
-		inputBar.focus();
+		if(issendImage){
+			sendattachment(api,id,text);
+			issendImage = false;
+			inputBar.focus();	
+		}else{
+			Message(api,id,text);
+			inputBar.focus();	
+		}
+		
     });
     button.on("click",function(){
     	sendImage(api,id);
@@ -404,60 +412,94 @@ function startGroupChat(api,ids,names,id){
     	}
     });
     inputBar.on("submit",function(text){
-		Message(api,id,text);
-		inputBar.focus();
+		if(issendImage){
+			sendattachment(api,id,text);
+			issendImage = false;
+			inputBar.focus();	
+		}else{
+			Message(api,id,text);
+			inputBar.focus();
+		}
     });
     button.on("click",function(){
     	sendImage(api,id);
     });
 }
 
+function sendattachment(api,id,text){
+	UI.log("sending");
+	inputBar = UI.getinputBar();
+	inputBar.clearValue();
+	
+	shell.mkdir("send");
+	shell.cp(text , "send");
+   	
+    
+		
+	var message = {
+    	body: "",
+    	attachment: fs.createReadStream("send/"+shell.ls('send')[0]),
+
+	}	
+
+	api.sendMessage(message, id,function(){
+		UI.log("You: (sent an attachment)");
+		shell.rm('-rf',"send/");
+	});
+    
+
+
+}
+
 
 function sendImage(api,id){
-	send = UI.getSend();
-	//screen = UI.getscreen();
-	UI.log("copy past the doc in the folder opened ")
-	shell.mkdir('-p' , './sent');
-	var dir = './SentItem'
-	if (!fs.existsSync(dir)){
-		fs.mkdirSync(dir);
-	}
-	shell.open("sent");
-	screen.append(send);
-	UI.log("Press the green button when done...");
-	send.on("click",function(){
-		files = shell.ls('sent');
-    	messages = [];
-	    for(var file = 0 ; file < files.length ; file++)
-	    {
+	// send = UI.getSend();
+	// //screen = UI.getscreen();
+	// UI.log("copy past the doc in the folder opened ")
+	// shell.mkdir('-p' , './sent');
+	// var dir = './SentItem'
+	// if (!fs.existsSync(dir)){
+	// 	fs.mkdirSync(dir);
+	// }
+	// shell.open("sent");
+	// screen.append(send);
+	// UI.log("Press the green button when done...");
+	// send.on("click",function(){
+	// 	files = shell.ls('sent');
+    	// messages = [];
+	    // for(var file = 0 ; file < files.length ; file++)
+	    // {
     		
-	    	var message = {
-		    	body: "",
-		    	// console.log(shell.ls('sent')[]);
+	    // 	var message = {
+		   //  	body: "",
+		   //  	// console.log(shell.ls('sent')[]);
 		    	
-	        	attachment: fs.createReadStream("sent/"+shell.ls('sent')[file]),
+	    //     	attachment: fs.createReadStream("sent/"+shell.ls('sent')[file]),
 
-    		}	
+    	// 	}	
 
-    		api.sendMessage(message, id,function(){
-	    		UI.log("You: (sent an attachment)");
-    			shell.rm('-rf',"sent/"+shell.ls('sent')[file]);
-	    	});
-	    }
-	    // fs.appendFile("SentItem/"+shell.ls('sent')[file], attch,function(){});
-	    // copyFile("sent/"+shell.ls('sent')[file],'SentItem');
-    	// shell.rm('-rf','sent');
-	    // console.log(data[id-1]);
+    	// 	api.sendMessage(message, id,function(){
+	    // 		UI.log("You: (sent an attachment)");
+    	// 		shell.rm('-rf',"sent/"+shell.ls('sent')[file]);
+	    // 	});
+	    // }
+	//     // fs.appendFile("SentItem/"+shell.ls('sent')[file], attch,function(){});
+	//     // copyFile("sent/"+shell.ls('sent')[file],'SentItem');
+ //    	// shell.rm('-rf','sent');
+	//     // console.log(data[id-1]);
 	    
-		send.destroy();
+	// 	send.destroy();
 		
 		
-	});
+	// });	
+	UI.log("Drag and drop the image in the input bar!! and press enter");
+	issendImage = true;
+
 }
 
 
 function Message(api,id,text){
-	
+	inputBar = UI.getinputBar();
 	if(text.match("@menu")){
 		screen.destroy();
 		unreadThreadsList = null;

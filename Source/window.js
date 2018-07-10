@@ -8,6 +8,7 @@ var notification;
 var button;
 var send;
 var threads;
+var imagebox;
 
 
 
@@ -19,7 +20,7 @@ function createWindows(){
 		top: 0,
 	  	left: 0,
 	  	height: 3,
-	  	width: '100%',
+	  	width: '100%-30',
 	  	keys: true,
 	  	mouse: true,
 	  	alwaysScroll: true,
@@ -30,6 +31,21 @@ function createWindows(){
 	  	},
 	  	border: {
     		type: 'line'
+  		}
+	});
+
+	imagebox = blessed.textbox({
+		bottom: 0,
+	  right: 10,
+	  height: 3,
+	  width: 20,
+	  keys: true,
+	  mouse: true,
+	  focused: true,
+	  inputOnFocus: true,
+	  border: {
+    		type: 'line',
+    		fg: "green"
   		}
 	});
 	body = blessed.box({
@@ -186,6 +202,10 @@ function getSend(){
 	return send;
 }
 
+function getimagebox(){
+	return imagebox;
+}
+
 module.exports = {
 	'log':log,
 	'lognotification':lognotification,
@@ -197,5 +217,6 @@ module.exports = {
 	'getButton':getButton,
 	'getSend':getSend,
 	'getthreads':getthreads,
-	'logthreads':logthreads
+	'logthreads':logthreads,
+	'getimagebox': getimagebox
 }
