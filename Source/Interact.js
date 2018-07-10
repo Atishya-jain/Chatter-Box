@@ -162,7 +162,7 @@ function listenCallback(api,id,name){
 						for(attachment in message.attachments){
 							
 					 		
-							if(message.attachments[attachment].type == "photo"){
+							// if(message.attachments[attachment].type == "photo"){
 								var dir = './Photo'
 								if (!fs.existsSync(dir)){
 									fs.mkdirSync(dir);
@@ -173,10 +173,11 @@ function listenCallback(api,id,name){
 									fs.mkdirSync(dir);
 								}
 								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
+									opn(message.attachments[attachment].url);
 									shell.open(dir + "/" + message.attachments[attachment].name);
 			  						UI.log(name + " : " + message.body + "(sent an attachment)");
 								});
-							}
+							// }
 						}
 					}else{
 						UI.log(name + " : " + message.body);
