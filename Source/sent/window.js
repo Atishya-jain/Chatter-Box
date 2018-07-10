@@ -83,22 +83,6 @@ function createWindows(){
 		},
 		content: "send Image"
 	});
-
-	send = blessed.button({
-		
-		bottom: 0,
-		right: 5,
-		height: 1,
-		width: 5,
-		keys: true,
-		mouse: true,
-		focused: true,
-		inputOnFocus: true,
-		style: {
-			fg: 'white',
-			bg: 'green'  // Green background so you see this is different from body
-		}
-	});
 	
 	// Add body to blessed screen
 	screen.append(body);
@@ -157,6 +141,22 @@ function getchats(){
 }
 
 function getSend(){
+	send = blessed.button({
+		
+		bottom: 0,
+		right: 5,
+		height: 1,
+		width: 5,
+		keys: true,
+		mouse: true,
+		focused: true,
+		inputOnFocus: true,
+		style: {
+			fg: 'white',
+			bg: 'green'  // Blue background so you see this is different from body
+		}
+	});
+	
 	return send;
 }
 
