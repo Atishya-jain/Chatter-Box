@@ -16,6 +16,7 @@ var notification;
 var FriendList = null;
 var GroupList = null;
 var send;
+var unreadThreadsList = null;
 // // listens for the messages on messenger 
 // function listen(api){
 // 	console.log("\033c");
@@ -24,26 +25,47 @@ var send;
 
 function unreadThreads(api){
 	console.log("\033c");
-	api.getThreadList(100, null, ["INBOX", "unread"], function(err, list){
-		if(err){
-			console.error(err);		 // May remove later
-			return unreadThreads(api)
-		};
-		var i = 1;
-		// Displaying all unreads
-		for(item in list){
-			console.log(i+"\033[1m"+list[item].name + " : " + list[item].snippet+"\033[0m");
-			i++;
-		}
+	if(unreadThreadsList == null)
+	{
+		api.getThreadList(100, null, ["INBOX", "unread"], function(err, list){
+			if(err){
+				console.error(err);		 // May remove later
+				return unreadThreads(api)
+			};
+			var i = 1;
+			unreadThreadsList = list;
+			// Displaying all unreads
+			for(item in list){
+				console.log(i+"\033[1m"+list[item].name + " : " + list[item].snippet+"\033[0m");
 
-	 	if(list.length == 0){
-			Output.PrintChoice(api, false);
-		}else{
-			Output.PrintChoice(api, true);
-		}
-		
-		getFriendList(api);
-	});
+				
+				i++;
+			}
+			
+		 	if(list.length == 0){
+				Output.PrintChoice(api, false);
+			}else{
+				Output.PrintChoice(api, true);
+			}
+			getFriendList(api);
+		});
+	}else{
+		var i = 1;
+		for(item in unreadThreadsList){
+				console.log(i+"\033[1m"+unreadThreadsList[item].name + " : " + unreadThreadsList[item].snippet+"\033[0m");
+
+				
+				i++;
+			}
+			if(unreadThreadsList.length == 0){
+				Output.PrintChoice(api, false);
+			}else{
+				Output.PrintChoice(api, true);
+			}
+			getFriendList(api);
+
+	}
+
 }
 
 function getFriendList(api){
@@ -111,8 +133,11 @@ function listenCallback(api,id,name){
 	notification = UI.getnotification();
 	button = UI.getButton();
 	body = UI.getbody();
-	
-	
+	threads = UI.getthreads();
+
+	displayUnreadThreads();
+
+
 
 	api.getThreadHistory(id, 10, null, (err, history) => {
  
@@ -190,14 +215,32 @@ function listenCallback(api,id,name){
 
 				        for(var prop in ret) {
 				            if(ret.hasOwnProperty(prop)) {
+				            	var pos = -1;
+				            	for(thread in unreadThreadsList){
+				            		if(unreadThreadsList[thread].name == ret[prop].name){
+				            			pos = thread;
+				            		}
+				            	}
 				            	if(message.attachments.length == 0)
 				                {
-				                	
 				                	UI.lognotification(ret[prop].name + " : " + message.body);
+				                	if(pos == -1){
+				                		unreadThreadsList.unshift({'name':ret[prop].name,'snippet':message.body});
+				                	}else{
+			                			unreadThreadsList[pos].snippet = message.body;
+				                	}
+				                	
+				                
+				                	
 			                	}else{
-			                		
 			                		UI.lognotification(ret[prop].name + " : Sent an attachment");	
+			                		if(pos == -1){
+			                			unreadThreadsList.unshift({'name':ret[prop].name,'snippet':message.body});
+				                	}else{
+			                			unreadThreadsList[pos].snippet = "Sent an attachment";
+				                	}
 			                	}
+	                			displayUnreadThreads();
 				            }
 				        }
     				});
@@ -215,6 +258,15 @@ function listenCallback(api,id,name){
     button.on("click",function(){
     	sendImage(api,id);
     });
+}
+function displayUnreadThreads(){
+threads = UI.getthreads();
+threads.setContent("");
+// UI.logthreads("\033c");
+for(thread in unreadThreadsList){
+	UI.logthreads(unreadThreadsList[thread].name + ":" +unreadThreadsList[thread].snippet);
+	UI.logthreads("\n");
+}
 }
 
 function groupListenCallback(api,id){
@@ -245,7 +297,7 @@ function startGroupChat(api,ids,names,id){
 	body = UI.getbody();
 	send = UI.getSend();
 	
-
+	displayUnreadThreads();
 	api.getThreadHistory(id, 10, null, (err, history) => {
  		UI.log("yo");
         for(item in history){
@@ -316,14 +368,32 @@ function startGroupChat(api,ids,names,id){
 
 				        for(var prop in ret) {
 				            if(ret.hasOwnProperty(prop)) {
+				            	var pos = -1;
+				            	for(thread in unreadThreadsList){
+				            		if(unreadThreadsList[thread].name == ret[prop].name){
+				            			pos = thread;
+				            		}
+				            	}
 				            	if(message.attachments.length == 0)
 				                {
-				                	
 				                	UI.lognotification(ret[prop].name + " : " + message.body);
+				                	if(pos == -1){
+				                		unreadThreadsList.unshift({'name':ret[prop].name,'snippet':message.body});
+				                	}else{
+			                			unreadThreadsList[pos].snippet = message.body;
+				                	}
+				                	
+				                
+				                	
 			                	}else{
-			                		
 			                		UI.lognotification(ret[prop].name + " : Sent an attachment");	
+			                		if(pos == -1){
+			                			unreadThreadsList.unshift({'name':ret[prop].name,'snippet':message.body});
+				                	}else{
+			                			unreadThreadsList[pos].snippet = "Sent an attachment";
+				                	}
 			                	}
+	                			displayUnreadThreads();
 				            }
 				        }
     				});
@@ -390,12 +460,14 @@ function Message(api,id,text){
 	
 	if(text.match("@menu")){
 		screen.destroy();
+		unreadThreadsList = null;
 		markRead(api,id);	
 	}else if(text.match("@displaydp")){
 		displaydp(id);
 		inputBar.clearValue();
 		
 	}else if(text.match("@groups")){
+		unreadThreadsList = null;
 		screen.destroy(function(){displaygroups(api)});
 		
 		

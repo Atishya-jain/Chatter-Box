@@ -7,6 +7,7 @@ var inputBar;
 var notification;
 var button;
 var send;
+var threads;
 
 
 
@@ -35,7 +36,7 @@ function createWindows(){
 	  top: 3,
 	  right: 0,
 	  height: '100%-7',
-	  width: '100%',
+	  width: '70%',
 	  keys: true,
 	  mouse: true,
 	  alwaysScroll: true,
@@ -49,6 +50,23 @@ function createWindows(){
   		}
 	});
 
+	threads = blessed.box({
+	  top: 3,
+	  left: 0,
+	  height: '100%-7',
+	  width: '30%',
+	  keys: true,
+	  mouse: true,
+	  alwaysScroll: true,
+	  scrollable: true,
+	  scrollbar: {
+	    ch: ' ',
+	    bg: 'red'
+	  },
+	  border: {
+    		type: 'line'
+  		}
+	});
 
 
 	
@@ -105,6 +123,7 @@ function createWindows(){
 	screen.append(inputBar);
 	screen.append(notification);
 	screen.append(button);
+	screen.append(threads);
 	inputBar.focus();
 	
 
@@ -121,7 +140,14 @@ function log(text) {
   screen.render();
 }
 
+function getthreads(){
+	return threads;
+}
 
+function logthreads(text){
+	threads.pushLine(text);
+  	screen.render();
+}
 
 function lognotification(text){
 	notification.content = text;		
@@ -170,4 +196,6 @@ module.exports = {
 	'getinputBar':getinputBar,
 	'getButton':getButton,
 	'getSend':getSend,
+	'getthreads':getthreads,
+	'logthreads':logthreads
 }
