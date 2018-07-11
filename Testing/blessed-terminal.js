@@ -35,9 +35,9 @@ var body = new XTerm(Object.assign({}, opts, {
     label:   "Sample XTerm #1"
 }))
 
-// let hint = "\r\nPress CTRL+q to stop sample program.\r\n" +
-//     "Press F1 or F2 to 😊switch between terminals.\r\n\r\n"
-// body.write(hint)
+let hint = "\r\nPress CTRL+q to stop sample program.\r\n" +
+    "😊\r\n\r\n"
+body.write(hint)
 
 
 const terminate = () => {
