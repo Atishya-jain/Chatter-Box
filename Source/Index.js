@@ -50,14 +50,14 @@ function start(credentials, savesession){
 		}
 //		ans = '';
 //		Input.ask(err, api);
-		var choice;
-		choice = readline.question("1)Display Unread Threads and choose friend\n2)Choose Group\n->");
-		if(choice == 1){
-			console.log("hi");
+//		var choice;
+//		choice = readline.question("1)Display Unread Threads and choose friend\n2)Choose Group\n->");
+//		if(choice == 1){
+			// console.log("hi");
 			Interact.unreadThreads(api);	
-		}else{
-			Interact.displaygroups(api);	
-		}
+//		}else{
+//			Interact.displaygroups(api);	
+//		}
 		
 		
 

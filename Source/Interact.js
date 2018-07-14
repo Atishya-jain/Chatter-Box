@@ -38,8 +38,6 @@ function unreadThreads(api){
 			// Displaying all unreads
 			for(item in list){
 				console.log(i+"\033[1m"+list[item].name + " : " + list[item].snippet+"\033[0m");
-
-				
 				i++;
 			}
 			
@@ -71,41 +69,102 @@ function unreadThreads(api){
 
 function getFriendList(api){
 //	console.log(FriendList);
-	if(FriendList === null){
+	if((FriendList === null) && (GroupList === null)){
 		api.getFriendsList((err, data) => {
-	    if(err){
-	    	console.error(err);
-	    	return getFriendList(api);
-		}
+		    if(err){
+		    	console.error(err);
+		    	return getFriendList(api);
+			}
+			FriendList = data;
+		    
+			api.getThreadList(1000, null, [], function(err,list){
+				if(err){
+			    	console.error(err);
+			    	return getFriendList(api);
+				}			
+				GroupList = [];
+				for(item in list){
+					if(list[item].isGroup && list[item].name){
+						GroupList.push(list[item]);
+					}
+				}
 
-		FriendList = data;
-	    id = Input.getName(data);
-	    if(id.length == 1){
-    		userid = data[id].userID;
-    		name = data[id].fullName;	
-    		listenCallback(api,userid,name);
-    	}else{
-    		detail = Input.GetSingleOption(id, data);
-    		userid = detail[0];
-    		name = detail[1];	
-    		listenCallback(api,userid,name);
-    	}
-	    });
+				id = Input.getName(FriendList, GroupList);
+			    if((id[0].length == 1) && (id[1].length == 0)){
+		    		userid = FriendList[id[0][0]].userID;
+		    		name = FriendList[id[0][0]].fullName;
+					listenCallback(api,userid,name);
+				}else if((id[0].length == 0) && (id[1].length == 1)){
+		    		userid = GroupList[id[1][0]].threadID;
+		    		name = GroupList[id[1][0]].name;
+		    		groupListenCallback(api, userid);
+		    	}else{
+		    		detail = Input.GetSingleOption(id, FriendList, GroupList);
+		    		userid = detail[0];
+		    		name = detail[1];
+					if(!detail[2]){
+			    		listenCallback(api,userid,name);
+					}else{
+						groupListenCallback(api,userid);
+					}
+		    	}
+			});			
+    	});
+    }else if(GroupList === null){
+		api.getThreadList(1000, null, [], function(err,list){
+			if(err){
+		    	console.error(err);
+		    	return getFriendList(api);
+			}			
+			GroupList = [];
+			for(item in list){
+				if(list[item].isGroup && list[item].name){
+					GroupList.push(list[item]);
+				}
+			}
+			id = Input.getName(FriendList, GroupList);
+		    if((id[0].length == 1) && (id[1].length == 0)){
+	    		userid = FriendList[id[0][0]].userID;
+	    		name = FriendList[id[0][0]].fullName;
+				listenCallback(api,userid,name);
+			}else if((id[0].length == 0) && (id[1].length == 1)){
+	    		userid = GroupList[id[1][0]].threadID;
+	    		name = GroupList[id[1][0]].name;
+	    		groupListenCallback(api, userid);
+	    	}else{
+	    		detail = Input.GetSingleOption(id, FriendList, GroupList);
+	    		userid = detail[0];
+	    		name = detail[1];
+				if(!detail[2]){
+		    		listenCallback(api,userid,name);
+				}else{
+					groupListenCallback(api,userid);
+				}
+	    	}
+		});			
     }else{
-	    id = Input.getName(FriendList);
-	    if(id.length == 1){
-    		userid = FriendList[id].userID;
-    		name = FriendList[id].fullName;	
-    		listenCallback(api,userid,name
-    			);
+	    id = Input.getName(FriendList, GroupList);
+	    if((id[0].length == 1) && (id[1].length == 0)){
+    		userid = FriendList[id[0][0]].userID;
+    		name = FriendList[id[0][0]].fullName;
+			listenCallback(api,userid,name);
+		}else if((id[0].length == 0) && (id[1].length == 1)){
+    		userid = GroupList[id[1][0]].threadID;
+    		name = GroupList[id[1][0]].name;
+    		groupListenCallback(api, userid);
     	}else{
-    		detail = Input.GetSingleOption(id, FriendList);
+    		detail = Input.GetSingleOption(id, FriendList, GroupList);
     		userid = detail[0];
-    		name = detail[1];	
-    		listenCallback(api,userid,name);
-    	}    	
-    }	
-}
+    		name = detail[1];
+			if(!detail[2]){
+	    		listenCallback(api,userid,name);
+			}else{
+				groupListenCallback(api,userid);
+			}
+    	}
+	}    	
+}	
+
 
 
 // function displayFriendList(api){
@@ -137,8 +196,6 @@ function listenCallback(api,id,name){
 	threads = UI.getthreads();
 
 	displayUnreadThreads();
-
-
 
 	api.getThreadHistory(id, 10, null, (err, history) => {
  
@@ -268,18 +325,24 @@ function listenCallback(api,id,name){
     });
 }
 function displayUnreadThreads(){
-threads = UI.getthreads();
-threads.setContent("");
-// UI.logthreads("\033c");
-for(thread in unreadThreadsList){
-	UI.logthreads(unreadThreadsList[thread].name + ":" +unreadThreadsList[thread].snippet);
-	UI.logthreads("\n");
-}
+	threads = UI.getthreads();
+	threads.setContent("");
+	// UI.logthreads("\033c");
+	for(thread in unreadThreadsList){
+		UI.logthreads(unreadThreadsList[thread].name + ":" +unreadThreadsList[thread].snippet);
+		UI.logthreads("\n");
+	}
 }
 
 function groupListenCallback(api,id){
 	var groupMember;
+	console.log(id);
 	api.getThreadInfo(id,function(err,info){
+		if(err){
+			console.log(err);
+			return groupListenCallback(api, id);
+		}
+		console.log(info);
 		var ids = info.participantIDs;
 		names = [];
 		api.getUserInfo(ids, (err, ret) => {
@@ -505,8 +568,8 @@ function Message(api,id,text){
 		unreadThreadsList = null;
 		markRead(api,id);	
 	}else if(text.match("@displaydp")){
-		displaydp(id);
 		inputBar.clearValue();
+		displaydp(id);
 		
 	}else if(text.match("@groups")){
 		unreadThreadsList = null;
@@ -521,40 +584,41 @@ function Message(api,id,text){
 
 }
 
-function displaygroups(api){
-	// console.log("\033c");
-	if(GroupList == null){
-		GroupList = [];
-		api.getThreadList(1000, null, [], function(err,list){
-			for(item in list){
-				if(list[item].isGroup && list[item].name){
-					GroupList.push(list[item]);
-				}
-			}
-			// UI.log(GroupList);
-			console.log("Your Gropus are ...... ");
-			var i = 1;
-			for(group in GroupList){
+// function displaygroups(api){
+// 	// console.log("\033c");
+// 	if(GroupList == null){
+// 		GroupList = [];
+// 		api.getThreadList(1000, null, [], function(err,list){
+// 			for(item in list){
+// 				if(list[item].isGroup && list[item].name){
+// 					GroupList.push(list[item]);
+// 				}
+// 			}
+// 			console.log(GroupList);
+// 			// UI.log(GroupList);
+// 			console.log("Your Gropus are ...... ");
+// 			var i = 1;
+// 			for(group in GroupList){
 				
-				if(GroupList[group].name)
-				{					
-					console.log(i + GroupList[group].name);
-					i = i + 1;
-				}		
-			}
-			id = readline.question("which group do you want to chat with:");
-			id = GroupList[id-1].threadID;	
-			groupListenCallback(api,id);
-		});
-	}
-	else{
-		for(group in GroupList){
-				if(GroupList[group].name)
-				console.log(GroupList[group].name);
-				groupListenCallback(api,id);
-			}
-	}
-}
+// 				if(GroupList[group].name)
+// 				{					
+// 					console.log(i + GroupList[group].name);
+// 					i = i + 1;
+// 				}		
+// 			}
+// 			id = readline.question("which group do you want to chat with:");
+// 			id = GroupList[id-1].threadID;	
+// 			groupListenCallback(api,id);
+// 		});
+// 	}
+// 	else{
+// 		for(group in GroupList){
+// 			if(GroupList[group].name)
+// 				console.log(GroupList[group].name);
+// 			groupListenCallback(api,id);
+// 		}
+// 	}
+// }
 
 function displaydp(id){
 	opn("https://graph.facebook.com/"+id+"/picture?type=large&redirect=true&width=500&height=500");
@@ -627,7 +691,7 @@ var download = function(uri, filename, callback){
 module.exports = {
 //	'listen': listen,
 //	'sendmessage': sendmessage,
-	'displaygroups': displaygroups,
+//	'displaygroups': displaygroups,
 	'download': download,
 	'unreadThreads':unreadThreads,
 }

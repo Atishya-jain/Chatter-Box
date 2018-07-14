@@ -34,43 +34,62 @@ function GetCredentials(){
  //    }
 //}
 
-function getName(data){
-	name = readline.question("Enter name of the person you want to chat with: ");
-    id = searchStringInArray(name, data);
-    if(id.length == 0){
+function getName(data1, data2){
+	name = readline.question("Enter name of the person/Group you want to chat with: ");
+    id1 = searchStringInArray(name, data1, true);
+    id2 = searchStringInArray(name, data2, false);
+    if((id1.length == 0) && (id2.length == 0)){
     	console.log("You entered the wrong name.");
-    	return getName(data);
+    	return getName(data1, data2);
     }else{
-    	return id;
+    	return [id1, id2];
     }
 }
 
 // Function to match name entered with a list of names.
 // ToDo: Change this to regex matching
-function searchStringInArray (str, strArray) {
+function searchStringInArray (str, strArray, isFriendList) {
 	nameList = [];
-    for (var j=0; j<strArray.length; j++) {
-        if (strArray[j].fullName.toLowerCase().match(str.toLowerCase())) nameList.push(j);
+	for (var j=0; j<strArray.length; j++) {
+	    if(!isFriendList){
+	    	if((strArray[j].name !== null) && (str !== null)){
+	    		if((str.length != 0) && (strArray[j].name != 0)){
+	    			if (strArray[j].name.toLowerCase().match(str.toLowerCase())) nameList.push(j);
+	    		}
+	    	}
+    	}else{
+	    	if((strArray[j].fullName !== null) && (str !== null)){
+	    		if((str.length != 0) && (strArray[j].fullName != 0)){
+	    			if (strArray[j].fullName.toLowerCase().match(str.toLowerCase())) nameList.push(j);
+	    		}
+	    	}    		
+    	}
     }
-    if(nameList.length == 0){
-	    return -1;
-    }else{
-    	return nameList;
-    }
+    return nameList;
 }
 
-function GetSingleOption(id, data){
-	dummy = []
-	for(var i = 0; i< id.length; i++){
-		dummy.push(data[id[i]]);
-		console.log((i+1) + " " + data[id[i]].fullName);
+function GetSingleOption(id, data1, data2){
+	dummy1 = []
+	dummy2 = []
+	for(var i = 0; i< id[0].length; i++){
+		dummy1.push(data1[id[0][i]]);
+		console.log((i+1) + " " + data1[id[0][i]].fullName);
 	}
-	pos = readline.question("Enter S.No. of the person you want to chat with: ");
-	if((pos > 0) && (pos < (id.length + 1))){
-		return [dummy[pos-1].userID, dummy[pos-1].fullName];
+	for(var i = 0; i< id[1].length; i++){
+		dummy2.push(data2[id[1][i]]);
+		console.log((i+1+id[0].length) + " " + data2[id[1][i]].name);
+	}
+	pos = readline.question("Enter S.No. of the person/Group you want to chat with: ");
+
+	if((pos > 0) && (pos < (id[0].length + 1 + id[1].length))){
+		if(pos <= id[0].length){
+			return [dummy1[pos-1].userID, dummy1[pos-1].fullName, false];
+		}else{
+			return [dummy2[pos-1-id[0].length].threadID, dummy2[pos-1-id[0].length].name, true];
+		}	
 	}else{
 		console.log("Wrong option. Please try again.");
-		return GetSingleOption(id, data);
+		return GetSingleOption(id, data1, data2);
 	}	
 }
 
