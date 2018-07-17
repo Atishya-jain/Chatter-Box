@@ -301,13 +301,11 @@ function displayUnreadThreads(){
 
 function groupListenCallback(api,id){
 	var groupMember;
-	console.log(id);
 	api.getThreadInfo(id,function(err,info){
 		if(err){
 			console.log(err);
 			return groupListenCallback(api, id);
 		}
-		console.log(info);
 		var ids = info.participantIDs;
 		names = [];
 		api.getUserInfo(ids, (err, ret) => {
@@ -335,7 +333,6 @@ function startGroupChat(api,ids,names,id){
 	
 	displayUnreadThreads();
 	api.getThreadHistory(id, 10, null, (err, history) => {
- 		UI.log("yo");
         for(item in history){
         	
     		name = names[ids.indexOf(history[item].senderID)];
