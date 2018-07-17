@@ -3,9 +3,6 @@
 	in the form required by the caller.
 */
 const readline = require("readline-sync")
-
-//const interact = require('./Interact');
-
 const fs = require("fs");
 
 // Function to get credentials of the user.
@@ -21,18 +18,6 @@ function GetCredentials(){
 	return {email: email, password: password};
 }
 
-//function ask(err, api){
-//	interact.unreadThreads(api, getName);	
-	// console.log("Hi There What do you want to do .... \n 1)Chat With a friend \n2)Send A New Message\n3)See UnreadThreads")	
-	// ans = readline.question("Option: ");
-	// if(ans == "1"){
-	// 	interact.listen(api);
- //    }else if(ans == "2"){
- //    	interact.sendmessage(err,api,ask);
- //    }else{
- //    	interact.unreadThreads(api);
- //    }
-//}
 
 function getName(data1, data2){
 	name = readline.question("Enter name of the person/Group you want to chat with: ");
@@ -47,7 +32,6 @@ function getName(data1, data2){
 }
 
 // Function to match name entered with a list of names.
-// ToDo: Change this to regex matching
 function searchStringInArray (str, strArray, isFriendList) {
 	nameList = [];
 	for (var j=0; j<strArray.length; j++) {
@@ -68,6 +52,7 @@ function searchStringInArray (str, strArray, isFriendList) {
     return nameList;
 }
 
+// Function to get a unique chat from user if there are multiple users matching the name entered
 function GetSingleOption(id, data1, data2){
 	dummy1 = []
 	dummy2 = []

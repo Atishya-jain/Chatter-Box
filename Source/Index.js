@@ -1,12 +1,5 @@
 /*
-	This file contains the control flow of our app.
-	It only contains various API calls both user defined and Node_Modules
-	Like this API is meant only for using conditionals and call other APIs
-	For eg:
-	if(str == "@img"){
-		input.InputImage();
-	}
-	and various other calls put together.
+	This file contains the control of various platforms.
 */
 
 const fs = require("fs");
@@ -48,18 +41,7 @@ function start(credentials, savesession){
 		}else{
 			Output.SaveSession(api);
 		}
-//		ans = '';
-//		Input.ask(err, api);
-//		var choice;
-//		choice = readline.question("1)Display Unread Threads and choose friend\n2)Choose Group\n->");
-//		if(choice == 1){
-			// console.log("hi");
 			Interact.unreadThreads(api);	
-//		}else{
-//			Interact.displaygroups(api);	
-//		}
-		
-		
 
 	});
 }

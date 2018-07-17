@@ -18,12 +18,8 @@ var GroupList = null;
 var send;
 var unreadThreadsList = null;
 var issendImage = false;
-// // listens for the messages on messenger 
-// function listen(api){
-// 	console.log("\033c");
-// 	displayFriendList(api);
-// }
 
+// Function to display unread threads of a user
 function unreadThreads(api){
 	console.log("\033c");
 	if(unreadThreadsList == null)
@@ -52,8 +48,6 @@ function unreadThreads(api){
 		var i = 1;
 		for(item in unreadThreadsList){
 				console.log(i+"\033[1m"+unreadThreadsList[item].name + " : " + unreadThreadsList[item].snippet+"\033[0m");
-
-				
 				i++;
 			}
 			if(unreadThreadsList.length == 0){
@@ -62,13 +56,12 @@ function unreadThreads(api){
 				Output.PrintChoice(api, true);
 			}
 			getFriendList(api);
-
 	}
-
 }
 
+// Function to fetch friendlist and grouplist to store
 function getFriendList(api){
-//	console.log(FriendList);
+	// If both of them are not defined
 	if((FriendList === null) && (GroupList === null)){
 		api.getFriendsList((err, data) => {
 		    if(err){
@@ -110,6 +103,7 @@ function getFriendList(api){
 		    	}
 			});			
     	});
+	// If friendlist is defined but not grouplist
     }else if(GroupList === null){
 		api.getThreadList(1000, null, [], function(err,list){
 			if(err){
@@ -142,6 +136,7 @@ function getFriendList(api){
 				}
 	    	}
 		});			
+	// If both are defined, so just get the correct person
     }else{
 	    id = Input.getName(FriendList, GroupList);
 	    if((id[0].length == 1) && (id[1].length == 0)){
@@ -166,25 +161,6 @@ function getFriendList(api){
 }	
 
 
-
-// function displayFriendList(api){
-// 	api.getFriendsList((err, data) => {
-// 	    if(err){
-// 	    	log(err);
-// 	    	return displayFriendList(api);
-// 		};
-// 	    i = 1;
-// 	    for(var person in data){
-// 	    	console.log(i + " " + data[person].firstName);
-// 	    	i++;
-// 	    }
-// 	    id = readline.question("Enter an the id of the person you want to chat with: ");
-// 	    userid = data[id-1].userID;
-// 	    name = data[id-1].fullName;
-// 	    listenCallback(api,userid,name);
-//     });
-// }
-
 function listenCallback(api,id,name){
 
 	UI.createWindows();
@@ -196,7 +172,6 @@ function listenCallback(api,id,name){
 	threads = UI.getthreads();
 
 	displayUnreadThreads();
-
 	api.getThreadHistory(id, 10, null, (err, history) => {
  
         for(item in history){
@@ -218,7 +193,6 @@ function listenCallback(api,id,name){
         			
         		}
 
-
         	}else{
         		if(history[item].attachments.length == 0){
     				UI.log("You : " + history[item].body);
@@ -229,23 +203,17 @@ function listenCallback(api,id,name){
         }
         
     });
-    UI.log("yo");
     api.listen((err, message) => {
     	
 		if(message){
 			
-
 			// get the username by using senderID that we received from the message
 	    	api.getUserInfo(message.senderID,function(err,ret){
-				if(message.senderID == id)
-				
+				if(message.senderID == id)				
 				{						
 	            
-	                
 	               	if(message.attachments.length > 0){
 						for(attachment in message.attachments){
-							
-					 		
 							// if(message.attachments[attachment].type == "photo"){
 								var dir = './Photo'
 								if (!fs.existsSync(dir)){
@@ -287,9 +255,7 @@ function listenCallback(api,id,name){
 				                	}else{
 			                			unreadThreadsList[pos].snippet = message.body;
 				                	}
-				                	
-				                
-				                	
+				                					                				                	
 			                	}else{
 			                		UI.lognotification(ret[prop].name + " : Sent an attachment");	
 			                		if(pos == -1){
@@ -327,7 +293,6 @@ function listenCallback(api,id,name){
 function displayUnreadThreads(){
 	threads = UI.getthreads();
 	threads.setContent("");
-	// UI.logthreads("\033c");
 	for(thread in unreadThreadsList){
 		UI.logthreads(unreadThreadsList[thread].name + ":" +unreadThreadsList[thread].snippet);
 		UI.logthreads("\n");
@@ -496,9 +461,7 @@ function sendattachment(api,id,text){
 	
 	shell.mkdir("send");
 	shell.cp(text , "send");
-   	
-    
-		
+
 	var message = {
     	body: "",
     	attachment: fs.createReadStream("send/"+shell.ls('send')[0]),
@@ -516,48 +479,8 @@ function sendattachment(api,id,text){
 
 
 function sendImage(api,id){
-	// send = UI.getSend();
-	// //screen = UI.getscreen();
-	// UI.log("copy past the doc in the folder opened ")
-	// shell.mkdir('-p' , './sent');
-	// var dir = './SentItem'
-	// if (!fs.existsSync(dir)){
-	// 	fs.mkdirSync(dir);
-	// }
-	// shell.open("sent");
-	// screen.append(send);
-	// UI.log("Press the green button when done...");
-	// send.on("click",function(){
-	// 	files = shell.ls('sent');
-    	// messages = [];
-	    // for(var file = 0 ; file < files.length ; file++)
-	    // {
-    		
-	    // 	var message = {
-		   //  	body: "",
-		   //  	// console.log(shell.ls('sent')[]);
-		    	
-	    //     	attachment: fs.createReadStream("sent/"+shell.ls('sent')[file]),
-
-    	// 	}	
-
-    	// 	api.sendMessage(message, id,function(){
-	    // 		UI.log("You: (sent an attachment)");
-    	// 		shell.rm('-rf',"sent/"+shell.ls('sent')[file]);
-	    // 	});
-	    // }
-	//     // fs.appendFile("SentItem/"+shell.ls('sent')[file], attch,function(){});
-	//     // copyFile("sent/"+shell.ls('sent')[file],'SentItem');
- //    	// shell.rm('-rf','sent');
-	//     // console.log(data[id-1]);
-	    
-	// 	send.destroy();
-		
-		
-	// });	
 	UI.log("Drag and drop the image in the input bar!! and press enter");
 	issendImage = true;
-
 }
 
 
@@ -575,7 +498,6 @@ function Message(api,id,text){
 		unreadThreadsList = null;
 		screen.destroy(function(){displaygroups(api)});
 		
-		
 	}else{
 		api.sendMessage(text, id);
 		inputBar.clearValue();
@@ -584,41 +506,6 @@ function Message(api,id,text){
 
 }
 
-// function displaygroups(api){
-// 	// console.log("\033c");
-// 	if(GroupList == null){
-// 		GroupList = [];
-// 		api.getThreadList(1000, null, [], function(err,list){
-// 			for(item in list){
-// 				if(list[item].isGroup && list[item].name){
-// 					GroupList.push(list[item]);
-// 				}
-// 			}
-// 			console.log(GroupList);
-// 			// UI.log(GroupList);
-// 			console.log("Your Gropus are ...... ");
-// 			var i = 1;
-// 			for(group in GroupList){
-				
-// 				if(GroupList[group].name)
-// 				{					
-// 					console.log(i + GroupList[group].name);
-// 					i = i + 1;
-// 				}		
-// 			}
-// 			id = readline.question("which group do you want to chat with:");
-// 			id = GroupList[id-1].threadID;	
-// 			groupListenCallback(api,id);
-// 		});
-// 	}
-// 	else{
-// 		for(group in GroupList){
-// 			if(GroupList[group].name)
-// 				console.log(GroupList[group].name);
-// 			groupListenCallback(api,id);
-// 		}
-// 	}
-// }
 
 function displaydp(id){
 	opn("https://graph.facebook.com/"+id+"/picture?type=large&redirect=true&width=500&height=500");
@@ -647,37 +534,6 @@ var copyFile = (file, dir2)=>{
   
   
 };
-// //sends messages
-// function sendmessage(err, api,ask){
-	
-//     if(err){
-//     	console.error(err);
-//     	return sendmessage(err,api,ask);
-//     };
-    
-//     api.getFriendsList((err, data) => {
-// 	    if(err) return console.error(err);
-// 	    i = 1;
-// 	    for(var person in data){
-// 	    	console.log(i + " " + data[person].firstName);
-// 	    	i++;
-// 	    }
-// 	    //console.log("Enter an the id of the person you want to message: ");
-// 	    //id = readline.question(">> ");
-
-// 		var id = readline.question("Who do you want to talk:(enter sno.)>> ");
-// 		var userID = list[id-1].threadID;
-// 		var name = list[id-1].name;
-
-// 	    listenCallback(api, userID, name);
-// 	    //message = readline.question("message: ");
-// 	    //console.log(data[id-1]);
-// 	    //api.sendMessage(message, data[id-1].userID,function(){
-// 	    //	ask(err, api);
-// 	    //});
-//     });
-// }
-
 
 var download = function(uri, filename, callback){
   request.head(uri, function(err, res, body){
@@ -685,13 +541,7 @@ var download = function(uri, filename, callback){
   });
 };
 
-
-
-
 module.exports = {
-//	'listen': listen,
-//	'sendmessage': sendmessage,
-//	'displaygroups': displaygroups,
 	'download': download,
 	'unreadThreads':unreadThreads,
 }
