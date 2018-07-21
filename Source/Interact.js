@@ -515,21 +515,21 @@ function sendImage(api,id){
 
 function Message(api,id,text){
 	inputBar = UI.getinputBar();
-	if(text == "@menu"){
+	if(text.toLowerCase() == "@menu"){
 		screen.destroy();
 		unreadThreadsList = null;
 		markRead(api,id);	
-	}else if(text == "@displaydp"){
+	}else if(text.toLowerCase() == "@dp"){
 		inputBar.clearValue();
 		displaydp(id);
 		
-	}else if(text == "@groups"){
+	}else if(text.toLowerCase() == "@groups"){
 		unreadThreadsList = null;
 		screen.destroy(function(){displaygroups(api)});
 		
 
 		
-	}else if(text == "@autostop"){
+	}else if(text.toLowerCase() == "@autostop"){
 		
 		if(auto){
 			for(i in auto){
@@ -541,7 +541,7 @@ function Message(api,id,text){
 		
 		UI.log("automatic msg stop ");
 		inputBar.clearValue();
-	}else if(text.startsWith("@auto")){
+	}else if(text.toLowerCase().startsWith("@auto")){
 		a = text.split("@auto");
 		if(!auto){
 			auto = [];
@@ -556,14 +556,35 @@ function Message(api,id,text){
 		auto.push({"id":id , "msg" : a[1]});
 		UI.log("automatic msg set to " + a[1]);
 		inputBar.clearValue();
-	}
-	else{
+	}else if(text.toLowerCase().startsWith("@schedule")){
+		b = text.split(" ");
+		date = b[1].split("/");
+		time = b[2].split(":");
 
+		date[0] = parseInt(date[0]);	
+		date[1] = parseInt(date[1]);	
+		date[2] = parseInt(date[2]);	
+
+		time[0] = parseInt(time[0]);
+		time[1] = parseInt(time[1]);
+
+		today = new Date();
+		myd = new Date(date[2], date[1] - 1, date[0], time[0], time[1]);
+		diff = myd - today;
+		if(diff < 0){
+			inputBar.clearValue();
+			UI.log("Time schedule is of past. Please reschedule it.(This message is only visible to you.)");
+		}else{
+			myText = (b.splice(3)).join(" ");
+			ScheduleMessage(api, id, myText, diff);
+			inputBar.clearValue();
+			UI.log("Message Scheduled Successfully.(This message is only visible to you.)");			
+		}
+	}else{
 		api.sendMessage(text, id);
 		inputBar.clearValue();
 		UI.log("You: "+text);		
 	}
-
 }
 
 
@@ -594,6 +615,13 @@ var copyFile = (file, dir2)=>{
   
   
 };
+
+function ScheduleMessage(api, id, text, time){
+	setTimeout(function(){
+		api.sendMessage(text, id);
+		UI.log("You: "+text);		
+	}, time);
+}
 
 var download = function(uri, filename, callback){
   request.head(uri, function(err, res, body){

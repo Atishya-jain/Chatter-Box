@@ -42,6 +42,5 @@ function start(credentials, savesession){
 			Output.SaveSession(api);
 		}
 			Interact.unreadThreads(api);	
-
 	});
 }
