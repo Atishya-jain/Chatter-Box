@@ -190,15 +190,15 @@ function listenCallback(api,id,name){
         		
         		if(history[item].isUnread){
         			if(history[item].attachments.length == 0){
-        				UI.log("\033[1m"+name + " : " + history[item].body + "\033[0m");
+        				UI.log("\033[33;1;1m"+name + " : " + history[item].body + "\033[0m");
         			}else{
-        				UI.log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
+        				UI.log("\033[33;1;1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
         			}
         		}else{
         			if(history[item].attachments.length == 0){
-        				UI.log(name + " : " + history[item].body);
+        				UI.log("\033[32;1m" + name + " : " + history[item].body + "\033[0m");
         			}else{
-        				UI.log(name + " : " + history[item].body + " (Sent an attachment)");
+        				UI.log("\033[32;1m" + name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
         			}
         			
         		}
@@ -249,12 +249,12 @@ function listenCallback(api,id,name){
 								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
 									opn(message.attachments[attachment].url);
 									shell.open(dir + "/" + message.attachments[attachment].name);
-			  						UI.log(name + " : " + message.body + "(sent an attachment)");
+			  						UI.log("\033[32;1m" + name + " : " + message.body + "(sent an attachment)" + "\033[0m");
 								});
 							// }
 						}
 					}else{
-						UI.log(name + " : " + message.body);
+						UI.log("\033[32;1m" + name + " : " + message.body + "\033[0m");
 					} 	
 	            
 	        	}else{
@@ -362,15 +362,15 @@ function startGroupChat(api,ids,names,id){
         		
         		if(history[item].isUnread){
         			if(history[item].attachments.length == 0){
-        				UI.log("\033[1m"+name + " : " + history[item].body + "\033[0m");
+        				UI.log("\033[33;1;1m"+name + " : " + history[item].body + "\033[0m");
         			}else{
-        				UI.log("\033[1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
+        				UI.log("\033[33;1;1m"+name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
         			}
         		}else{
         			if(history[item].attachments.length == 0){
-        				UI.log(name + " : " + history[item].body);
+        				UI.log("\033[32;1m" + name + " : " + history[item].body + "\033[0m");
         			}else{
-        				UI.log(name + " : " + history[item].body + " (Sent an attachment)");
+        				UI.log("\033[32;1m" + name + " : " + history[item].body + " (Sent an attachment)" + "\033[0m");
         			}
         			
         		}
@@ -419,12 +419,12 @@ function startGroupChat(api,ids,names,id){
 								}
 								download(message.attachments[attachment].url, dir + "/" + message.attachments[attachment].name, function(){
 									shell.open(dir + "/" + message.attachments[attachment].name);
-			  						UI.log(name + " : " + message.body + "(sent an attachment)");
+			  						UI.log("\033[32;1m" + name + " : " + message.body + "(sent an attachment)") +"\033[0m";
 								});
 							}
 						}
 					}else{
-						UI.log(name + " : " + message.body);
+						UI.log("\033[32;1m" + name + " : " + message.body + "\033[0m");
 					} 	
 	            
 	        	}else{
