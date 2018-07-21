@@ -19,6 +19,16 @@ var send;
 var unreadThreadsList = null;
 var issendImage = false;
 
+var auto = null;
+
+// // listens for the messages on messenger 
+// function listen(api){
+// 	console.log("\033c");
+// 	displayFriendList(api);
+// }
+
+
+
 // Function to display unread threads of a user
 function unreadThreads(api){
 	console.log("\033c");
@@ -205,6 +215,18 @@ function listenCallback(api,id,name){
     });
     api.listen((err, message) => {
     	
+		var pos = -1;
+		if(auto){
+			for(i in auto){
+				if(auto[i].id == message.senderID){
+					api.sendMessage(auto[i].msg, message.senderID);
+					break;
+				}
+			}
+		}
+
+    	
+
 		if(message){
 			
 			// get the username by using senderID that we received from the message
@@ -361,6 +383,16 @@ function startGroupChat(api,ids,names,id){
 
 	api.listen((err, message) => {
     	
+		var pos = -1;
+		if(auto){
+			for(i in auto){
+				if(auto[i].id == message.senderID){
+					api.sendMessage(auto[i].msg, message.senderID);
+					break;
+				}
+			}
+		}
+
 		if(message){
 			
 
@@ -466,7 +498,7 @@ function sendattachment(api,id,text){
 	}	
 
 	api.sendMessage(message, id,function(){
-		UI.log("You: (sent an attachment)");
+		UI.log("You : (sent an attachment)");
 		shell.rm('-rf',"send/");
 	});
     
@@ -483,19 +515,50 @@ function sendImage(api,id){
 
 function Message(api,id,text){
 	inputBar = UI.getinputBar();
-	if(text.match("@menu")){
+	if(text == "@menu"){
 		screen.destroy();
 		unreadThreadsList = null;
 		markRead(api,id);	
-	}else if(text.match("@displaydp")){
+	}else if(text == "@displaydp"){
 		inputBar.clearValue();
 		displaydp(id);
 		
-	}else if(text.match("@groups")){
+	}else if(text == "@groups"){
 		unreadThreadsList = null;
 		screen.destroy(function(){displaygroups(api)});
 		
-	}else{
+
+		
+	}else if(text == "@autostop"){
+		
+		if(auto){
+			for(i in auto){
+				if(auto[i].id == id){
+					auto.splice(i,1);
+				}
+			}
+		}
+		
+		UI.log("automatic msg stop ");
+		inputBar.clearValue();
+	}else if(text.startsWith("@auto")){
+		a = text.split("@auto");
+		if(!auto){
+			auto = [];
+		}
+		if(auto){
+			for(i in auto){
+				if(auto[i].id == id){
+					auto.splice(i,1);
+				}
+			}
+		}
+		auto.push({"id":id , "msg" : a[1]});
+		UI.log("automatic msg set to " + a[1]);
+		inputBar.clearValue();
+	}
+	else{
+
 		api.sendMessage(text, id);
 		inputBar.clearValue();
 		UI.log("You: "+text);		
