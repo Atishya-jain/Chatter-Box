@@ -153,6 +153,7 @@ function createWindows(){
 
 function log(text) {
   body.pushLine(text);
+  body.scroll(100);
   screen.render();
 }
 
