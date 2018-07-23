@@ -25,14 +25,17 @@ Our aim is to integrate it with other chatting platforms in near future.
 - appstate.json contains all the confedential information in an encrypted form
 - Follow On-CLI instructions to proceed further
 
-## Get started for users
-- Install npm package of the app globally
-  - `npm install chatterbox-devclub -g`
-- Run the app
-  - `sudo messenger`
-- Enter your credentials (For the first time facebook might block it in the first go. You need to verify the activity on facebook so that it allows you to connect through your CLI)
-- Follow On-CLI instructions to proceed further
-
+## Extra Features
+- Extra side window for all unread messages
+- Notification bar for incoming messages
+- Type @menu while on chat to go back and chat with someone else
+- Type @dp while on chat to see the dp of the person and verify that you are chatting with the correct person
+- Type @auto Message to set Message as an auto reply to the person for any incoming message from him/her
+- Type @autostop to stop auto message on
+- Type @schedule dd/mm/yyyy hh:mm Message to schedule a message on dd/mm/yyyy at hh:mm to be sent automatically
+  - For message to be sent, the process must be running on a terminal.
+  - A solution for this is to use screen to similar tools for running the process in backgrund, but still the system must be on.
+  - A permanent solution is to host a central server for all scheduled and auto reply service but this app is at a prototype stage so       does not include that at the moment.
 ## Technology and API's used
 - This CLI currently only supports messenger.
 - We have use facebook-chat-api for building a connection protocol with facebook.
