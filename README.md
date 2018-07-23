@@ -37,7 +37,7 @@ Our aim is to integrate it with other chatting platforms in near future.
   - A solution for this is to use screen to similar tools for running the process in backgrund, but still the system must be on.
   - A permanent solution is to host a central server for all scheduled and auto reply service but this app is at a prototype stage so       does not include that at the moment.
   
-  ![How to shake](https://drive.google.com/open?id=16R5fQUpXpE8qJ1F_MnVOpqOMrb8SCczj)
+  ![How to shake](https://github.com/Atishya-jain/Chatter-Box/blob/master/GIF-2018-07-24-00-17-16.gif)
 
   
 ## Technology and API's used
