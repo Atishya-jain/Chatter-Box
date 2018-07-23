@@ -36,6 +36,10 @@ Our aim is to integrate it with other chatting platforms in near future.
   - For message to be sent, the process must be running on a terminal.
   - A solution for this is to use screen to similar tools for running the process in backgrund, but still the system must be on.
   - A permanent solution is to host a central server for all scheduled and auto reply service but this app is at a prototype stage so       does not include that at the moment.
+  
+  ![How to shake](https://drive.google.com/open?id=16R5fQUpXpE8qJ1F_MnVOpqOMrb8SCczj)
+
+  
 ## Technology and API's used
 - This CLI currently only supports messenger.
 - We have use facebook-chat-api for building a connection protocol with facebook.
